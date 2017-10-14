@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "phypro": "./bin/phypro.js | node_modules/.bin/bunyan"
+    "phypro": "./bin/cli.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,10 @@
   "dependencies": {
     "argparse": "^1.0.9",
     "bunyan": "^1.8.12",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "shelljs": "^0.7.8"
+  },
+  "devDependencies": {
+    "eslint": "^4.8.0"
   }
 }

@@ -1,7 +1,5 @@
 'use strict'
 
-'use strict'
-
 let fs = require('fs'),
 	path = require('path'),
 	bunyan = require('bunyan'),
@@ -44,14 +42,6 @@ class PhyPro {
 	}
 
 	loadExistingConfig(configFilename = '') {
-		return new Promise((res, rej) => {
-			try {
-				this.config = require(configFilename)
-				res()
-			}
-			catch (err) {
-				rej(err)
-			}
-		})
+		this.config = require(configFilename)
 	}
 }
