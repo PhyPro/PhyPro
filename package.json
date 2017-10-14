@@ -1,0 +1,27 @@
+{
+  "name": "phypro",
+  "version": "0.1.0",
+  "description": "PhyPro - Advanced Phylogenetic Profile for Biologists",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "phypro": "./bin/phypro.js | node_modules/.bin/bunyan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhyPro/PhyPro.git"
+  },
+  "author": "Davi Ortega",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PhyPro/PhyPro/issues"
+  },
+  "homepage": "https://github.com/PhyPro/PhyPro#readme",
+  "dependencies": {
+    "argparse": "^1.0.9",
+    "bunyan": "^1.8.12",
+    "mkdirp": "^0.5.1"
+  }
+}
