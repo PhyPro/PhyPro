@@ -4,7 +4,8 @@
   "description": "PhyPro - Advanced Phylogenetic Profile for Biologists",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_PATH=node_modules node_modules/.bin/mocha --reporter ${MOCHA_REPORTER-spec} $(find src -name '*tests.js')",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec $(find src -name '*tests.js')"
   },
   "bin": {
     "phypro": "./bin/cli.js"
@@ -22,10 +23,16 @@
   "dependencies": {
     "argparse": "^1.0.9",
     "bunyan": "^1.8.12",
+    "istanbul": "^0.4.5",
     "mkdirp": "^0.5.1",
     "shelljs": "^0.7.8"
   },
   "devDependencies": {
-    "eslint": "^4.8.0"
+    "chai": "^4.1.2",
+    "chai-fs": "^1.0.0",
+    "coveralls": "^3.0.0",
+    "eslint": "^4.8.0",
+    "mocha": "^4.0.1",
+    "rimraf": "^2.6.2"
   }
 }
