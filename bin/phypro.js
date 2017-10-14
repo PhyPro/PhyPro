@@ -23,4 +23,6 @@ let args = parser.parseArgs(),
 	ProjectName = args.init[0]
 
 let phypro = new PhyPro(ProjectName)
-phypro.init()
+phypro.init().catch((err) => {
+	throw new Error(err)
+})

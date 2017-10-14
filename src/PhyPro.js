@@ -28,11 +28,11 @@ class PhyPro {
 		this.log.info('Project ' + this.config.header.ProjectName + ' initialized.')
 
 		this.config.phyloprofile = {}
-		mkdirp(path.resolve(localPath, 'phylo-profile'))
+		mkdirp.sync(path.resolve(localPath, 'phylo-profile'))
 		this.log.info('Pipeline phyloprofile initialized successfully')
 
 		this.config.tree = {}
-		mkdirp(path.resolve(localPath, 'ref-tree'))
+		mkdirp.sync(path.resolve(localPath, 'ref-tree'))
 		this.log.info('Pipeline tree initialized successfully')
 
 		let configFilename = 'phypro.' + this.config.header.ProjectName + '.config.json'
