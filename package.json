@@ -10,7 +10,7 @@
   "bin": {
     "phypro": "./bin/cli.js"
   },
-  "nyc" : {
+  "nyc": {
     "exclude": [
       "src/**tests.js"
     ]
@@ -29,6 +29,7 @@
     "argparse": "^1.0.9",
     "bunyan": "^1.8.12",
     "istanbul": "^0.4.5",
+    "jsonfile": "^4.0.0",
     "mkdirp": "^0.5.1",
     "shelljs": "^0.7.8"
   },

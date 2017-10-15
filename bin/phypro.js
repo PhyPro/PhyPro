@@ -12,17 +12,41 @@ let parser = new ArgumentParser({
 })
 
 parser.addArgument(
-	['--init'],
+	['ProjectName'],
 	{
-		help: 'Initialize the directory structure and creates the config file',
+		help: 'Name of the Project',
 		nargs: 1
 	}
 )
 
-let args = parser.parseArgs(),
-	ProjectName = args.init[0]
+parser.addArgument(
+	['--init'],
+	{
+		help: 'Initialize the directory structure and creates the config file',
+		nargs: 0
+	}
+)
 
-let phypro = new PhyPro(ProjectName)
-phypro.init().catch((err) => {
-	throw new Error(err)
-})
+parser.addArgument(
+	['--keepgoing'],
+	{
+		help: 'Search for the config file of the project name passed. If found, it will execute the next step of the chosen pipeline',
+		nargs: 1,
+		metavar: [
+			'pipeline'
+		],
+		choices: [
+			'phylo-profile',
+			'ref-tree'
+		]
+	}
+)
+
+
+let args = parser.parseArgs(),
+	ProjectName = args.ProjectName
+
+if (args.init) {
+	let phypro = new PhyPro(ProjectName)
+	phypro.init()
+}
