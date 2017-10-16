@@ -8,7 +8,8 @@ const stages = [
 	'fetchProteinData',
 	'makeFastaFiles',
 	'trimSequences',
-	'BLASTAll'
+	'BLASTAll',
+	'ParseBLASTData'
 ]
 
 module.exports =
