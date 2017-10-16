@@ -2,6 +2,15 @@
 
 const Pipeline = require('./Pipeline.js')
 
+const stages = [
+	'init',
+	'fetchGenomeData',
+	'fetchProteinData',
+	'makeFastaFiles',
+	'trimSequences',
+	'BLASTAll'
+]
+
 module.exports =
 class PhyloProfile extends Pipeline {
 	constructor() {
@@ -10,5 +19,9 @@ class PhyloProfile extends Pipeline {
 		this.config.trimRules = {}
 		this.config.genomes = []
 		this.config.referenceGenomes = []
+	}
+
+	keepGoing() {
+
 	}
 }
