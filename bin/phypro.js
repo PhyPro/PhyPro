@@ -6,6 +6,10 @@ let path = require('path'),
 
 let PhyPro = require('../src/PhyPro.js')
 
+const availablePipelines = require('../src/availablePipelines.json')
+
+let pipelines = Object.keys(availablePipelines)
+
 let parser = new ArgumentParser({
 	addHelp: true,
 	description: 'PhyPro - Advanced Phylogenetic Profile for Biologists'
@@ -31,22 +35,22 @@ parser.addArgument(
 	['--keepgoing'],
 	{
 		help: 'Search for the config file of the project name passed. If found, it will execute the next step of the chosen pipeline',
-		nargs: 1,
+		nargs: '+',
 		metavar: [
 			'pipeline'
 		],
-		choices: [
-			'phylo-profile',
-			'ref-tree'
-		]
+		choices: pipelines
 	}
 )
 
-
 let args = parser.parseArgs(),
-	ProjectName = args.ProjectName
+	ProjectName = args.ProjectName[0]
 
-if (args.init) {
-	let phypro = new PhyPro(ProjectName)
+let phypro = new PhyPro(ProjectName)
+
+if (args.init)
 	phypro.init()
+else {
+	phypro.keepGoing(args.keepgoing)
+	// phypro.packData()
 }

@@ -1,0 +1,8 @@
+{
+    "phylo-profile" : {
+        "start": "require('./PhyloProfile.js')"
+    },
+    "ref-tree" : {
+        "start": "require('./RefTree.js')"
+    }
+}

@@ -42,6 +42,10 @@ describe('PhyPro', function() {
 			expect(path.resolve(testPath, 'phylo-profile')).to.be.a.directory()
 			expect(path.resolve(testPath, 'ref-tree')).to.be.a.directory()
 		})
+		it('must add the initial config information for each pipeline in the master configuration file.', function() {
+			let phypro = new PhyPro()
+			phypro.init(testPath)
+		})
 		afterEach(function() {
 			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
 			rimraf.sync(path.resolve(testPath, 'ref-tree'))
@@ -142,14 +146,14 @@ describe('PhyPro', function() {
 		it('throws error if does not have the right directory structure', function() {
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
-			expect(phypro.keepgoing.bind(phypro, 'ref-tree')).to.throw('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
+			expect(phypro.keepGoing.bind(phypro, 'ref-tree')).to.throw('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
 		})
 		it('It loads the standard config as default', function() {
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
 			process.chdir(testPath)
 			phypro.init()
-			phypro.keepgoing('ref-tree')
+			phypro.keepGoing('ref-tree')
 		})
 		after(function() {
 			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
@@ -162,3 +166,4 @@ describe('PhyPro', function() {
 		})
 	})
 })
+

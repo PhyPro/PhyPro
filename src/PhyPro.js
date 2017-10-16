@@ -6,11 +6,11 @@ let fs = require('fs'),
 	mkdirp = require('mkdirp'),
 	jsonfile = require('jsonfile')
 
+const availablePipelines = require('../src/availablePipelines.json')
 
-const pipelines = ['phylo-profile', 'ref-tree']
+const pipelines = Object.keys(availablePipelines)
 
 module.exports =
-
 class PhyPro {
 	/**
 	 * Creates an instance of PhyPro.
@@ -32,20 +32,29 @@ class PhyPro {
 		this.log.info('Project ' + this.config.header.ProjectName + ' initialized.')
 
 		pipelines.forEach((pipeline) => {
-			this.config.phyloprofile = {}
+			let PipeInstance = eval(availablePipelines[pipeline].start),
+				pipeInstance = new PipeInstance()
+			this.config[pipeline] = pipeInstance.config
 			mkdirp.sync(path.resolve(localPath, pipeline))
 			this.log.info('Pipeline ' + pipeline + ' initialized successfully')
 		})
-
 		let configFilename = 'phypro.' + this.config.header.ProjectName + '.config.json'
 		let configFullPath = path.resolve(localPath, configFilename)
 
 		fs.writeFileSync(configFullPath, JSON.stringify(this.config, null, ' '))
+		console.log('Everything looks good, now you must config the config file and run this command again with the flag --keepgoing followed by the pipeline(s) you want to start running. You can run multiple pipelines as once, PhyPro will grab N-1 processors from your computer and divide equally between the tasks. For efficiency in big jobs, try running one pipeline at the time.')
 	}
 
-	keepgoing(pipeline) {
+	keepGoing(pipelineChoices) {
 		this._isValidProjectStructure()
 		this._loadConfig()
+		pipelines.forEach((pipeline) => {
+			let PipeInstance = eval(availablePipelines[pipeline].start),
+				pipeInstance = new PipeInstance()
+			pipeInstance.loadConfig(this.config[pipeline])
+			this.log.info('Config file for ' + pipeline + ' loaded successfully')
+			pipeInstance.keepGoing()
+		})
 	}
 
 	_isValidProjectStructure() {
