@@ -2,6 +2,18 @@
 
 const Pipeline = require('./Pipeline.js')
 
+const stages = [
+	'fetchGenomes',
+	'fetchCDDs',
+	'buildRPSdb',
+	'runRPS',
+	'alignSeqs',
+	'concatSeqs',
+	'gBlock',
+	'phylogeny',
+	'processTree'
+]
+
 module.exports =
 class RefTree extends Pipeline {
 	constructor() {
