@@ -50,7 +50,5 @@ let phypro = new PhyPro(ProjectName)
 
 if (args.init)
 	phypro.init()
-else {
+else
 	phypro.keepGoing(args.keepgoing)
-	// phypro.packData()
-}

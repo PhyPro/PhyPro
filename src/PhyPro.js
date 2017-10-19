@@ -48,7 +48,7 @@ class PhyPro {
 	keepGoing(pipelineChoices) {
 		this._isValidProjectStructure()
 		this._loadConfig()
-		pipelines.forEach((pipeline) => {
+		pipelineChoices.forEach((pipeline) => {
 			let PipeInstance = eval(availablePipelines[pipeline].start),
 				pipeInstance = new PipeInstance()
 			pipeInstance.loadConfig(this.config[pipeline])

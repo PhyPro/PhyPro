@@ -153,7 +153,7 @@ describe('PhyPro', function() {
 			let phypro = new PhyPro(projectName)
 			process.chdir(testPath)
 			phypro.init()
-			phypro.keepGoing('ref-tree')
+			phypro.keepGoing(['ref-tree'])
 		})
 		after(function() {
 			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
