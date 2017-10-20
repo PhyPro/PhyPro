@@ -9,8 +9,6 @@ let httpOptions = {
 	headers: {}
 }
 
-module.exports =
-
 class Taxonomy {
 	constructor(taxonomyID, options) {
 		this.taxonomyID = taxonomyID
@@ -18,8 +16,15 @@ class Taxonomy {
 	}
 
 	getIDs() {
-		let ids = this.httpRequest_()
-		return ids
+		return new Promise((res, rej) => {
+			this.httpRequest_().then((items) => {
+				res(items)
+			})
+		})
+	}
+
+	makeNewick_(taxInfo) {
+		return null
 	}
 
 	updateConfigFile(filename) {
@@ -27,24 +32,27 @@ class Taxonomy {
 	}
 
 	httpRequest_() {
-		httpOptions.path = '/v1/taxonomy/' + this.taxonomyID + '/children'
-		let req = http.request(httpOptions, function(res) {
-			let chunks = []
-			res.on('data', function(chunk) {
-				chunks.push(chunk)
-			})
-			res.on('end', function() {
-				let items = JSON.parse(Buffer.concat(chunks))
-				let species = []
-				items.forEach((item) => {
-					// if (item.rank === 'species')
-					species.push(item.id)
+		return new Promise((resolve, reject) => {
+			httpOptions.path = '/v1/taxonomy/' + this.taxonomyID + '/children'
+			let req = http.request(httpOptions, function(res) {
+				let chunks = []
+				res.on('data', function(chunk) {
+					chunks.push(chunk)
 				})
-				console.log(species.length)
-				return species
+				res.on('end', function() {
+					let items = JSON.parse(Buffer.concat(chunks))
+					let species = []
+					items.forEach((item) => {
+						// if (item.rank === 'species')
+						species.push(item)
+					})
+					resolve(species)
+				})
 			})
+			req.end()
 		})
-		req.end()
 	}
 }
 
+
+exports.Taxonomy = Taxonomy
