@@ -1,4 +1,4 @@
-#! /usr/local/bin/node
+#!/usr/bin/env node
 'use strict'
 let shell = require('shelljs'),
 	path = require('path')

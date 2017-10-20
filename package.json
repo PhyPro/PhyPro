@@ -8,7 +8,7 @@
     "coverage": "NODE_PATH=node_modules node_modules/.bin/nyc report --reporter=text-lcov | coveralls"
   },
   "bin": {
-    "phypro": "./bin/cli.js"
+    "phypro": "./bin/cli-phypro.js"
   },
   "nyc": {
     "exclude": [

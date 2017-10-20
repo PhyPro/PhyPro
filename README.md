@@ -54,11 +54,53 @@ This command will save to `protbac.100.taxID.dat` 100 randomly selected taxonomy
 
 Conveniently, there is also the flag `--update` which will take the project name as an argument and will be pushed add the ids to the list already existent in the config file.
 
+### Reference Genomes
+
+We may want to know more about systems from specific organisms. For that, we have the `refGenomes` field in the config file.
+
+There are two ways to fill that, one is to manually insert the taxonomy ids. The second way is to provide a `json` file with the information.
+
+```json
+[
+    {
+        "name": "Legionella pneumophila subsp. pneumophila str. Philadelphia 1",
+        "taxid": 272624
+    },
+    {
+        "name": "Myxococcus xanthus DK 1622",
+        "taxid":  246197
+    },
+    {
+        "name": "Pseudomonas aeruginosa PAO1",
+        "taxid":  208964
+    },
+]
+```
+
+and use the phypro command line helper `phypro-load-refgenomes` to include it in the config file, like this:
+
+```
+$ phypro-load-refgenomes ProjectName my_genomes.json
+```
+PhyPro does not care of any of the fields in this file but the `taxid`. Thus, it might be useful to keep notes about each of the reference genome and etc.
+
+Finally, PhyPro will safely include any reference genomes that was not listed in the genomes list but will not duplicate them.
+
+## Validate config file
+
+To avoid wasting time, before we start the pipelines, PhyPro will ask to validade the config file and inform of any mistaken we might have made:
+
+```
+$ phypro --validate-config ProjectName
+```
+
+It will try to be as informative as possible about any issue the config file might have.
+
 ## Keep going
 
 After we configure the config file, we are pretty much set. The next step is to tell PhyPro what we want it to do.
 
-we can do that by the use of the flag --keepgoing. This flag must have at least one argument, which is the name of the pipeline we wish PhyPro to run. Notice that as of the version of this manual, the standard release of PhyPro has two pipelines: `phylo-profile` and `ref-tree`. we can pass either or both.
+we can do that by the use of the flag --keep-going. This flag must have at least one argument, which is the name of the pipeline we wish PhyPro to run. Notice that as of the version of this manual, the standard release of PhyPro has two pipelines: `phylo-profile` and `ref-tree`. we can pass either or both.
 
 Now it comes the catch, this version is not on docker containers yet, so we will need to have the following softwares up and running:
 

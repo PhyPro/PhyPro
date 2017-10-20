@@ -155,6 +155,7 @@ describe('PhyPro', function() {
 			phypro.init()
 			phypro.keepGoing(['ref-tree'])
 		})
+		it('must make sure that config file has been validated')
 		after(function() {
 			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
 			rimraf.sync(path.resolve(testPath, 'ref-tree'))

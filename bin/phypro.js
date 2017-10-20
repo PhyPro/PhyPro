@@ -32,7 +32,7 @@ parser.addArgument(
 )
 
 parser.addArgument(
-	['--keepgoing'],
+	['--keep-going'],
 	{
 		help: 'Search for the config file of the project name passed. If found, it will execute the next step of the chosen pipeline',
 		nargs: '+',
@@ -51,4 +51,4 @@ let phypro = new PhyPro(ProjectName)
 if (args.init)
 	phypro.init()
 else
-	phypro.keepGoing(args.keepgoing)
+	phypro.keepGoing(args.keep_going)
