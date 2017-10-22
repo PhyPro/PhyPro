@@ -27,6 +27,7 @@
   "homepage": "https://github.com/PhyPro/PhyPro#readme",
   "dependencies": {
     "argparse": "^1.0.9",
+    "bluebird": "^3.5.1",
     "bunyan": "^1.8.12",
     "istanbul": "^0.4.5",
     "jsonfile": "^4.0.0",
