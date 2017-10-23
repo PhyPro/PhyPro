@@ -2,7 +2,7 @@
 
 const http = require('http')
 const lodash = require('lodash')
-const Promise = require("bluebird")
+const Promise = require('bluebird')
 
 let httpOptions = {
 	method: 'GET',
@@ -19,13 +19,14 @@ class Taxonomy {
 
 	makeJsonTree() {
 		return new Promise((res, rej) => {
-			this.jsonTree = {
+			let jsonTree = {
 				name: this.taxonomyID
 			}
 			this.makeJsonSubTree_(this.taxonomyID).then((subtree) => {
 				if (subtree.length !== 0)
-					this.jsonTree.children.push(subtree)
-				res()
+					jsonTree.children = subtree
+				this.jsonTree = jsonTree
+				res(jsonTree)
 			})
 		})
 	}
@@ -34,25 +35,20 @@ class Taxonomy {
 		return new Promise((res, rej) => {
 			this.getImmediateChildren_(taxid).then((items) => {
 				try {
-					items.shift()
-					console.log('taxId: ' + taxid)
-					console.log(items)
 					let jsonTree = []
 					let subTrees = []
 					items.forEach((item) => {
 						let jsonTreeItem = {
 							name: item.id
 						}
+						jsonTree.push(jsonTreeItem)
 						subTrees.push(this.makeJsonSubTree_(item.id))
 					})
 					Promise.all(subTrees).then((subTreeResults) => {
-						let children = []
-						subTreeResults.forEach((subTree) => {
+						subTreeResults.forEach((subTree, i) => {
 							if (subTree.length > 0)
-								children.push(subTree)
+								jsonTree[i].children = subTree
 						})
-						if (children.length > 0)
-							jsonTree.children = children
 						res(jsonTree)
 					})
 				}
@@ -66,7 +62,6 @@ class Taxonomy {
 	getImmediateChildren_(taxid) {
 		return new Promise((resolve, reject) => {
 			httpOptions.path = '/v1/taxonomy/' + taxid + '/children?immediate=true'
-			console.log(httpOptions.path)
 			let req = http.request(httpOptions, function(res) {
 				let chunks = []
 				res.on('data', function(chunk) {
@@ -75,8 +70,6 @@ class Taxonomy {
 				res.on('end', function() {
 					let items = JSON.parse(Buffer.concat(chunks))
 					let species = []
-					console.log(taxid)
-					console.log(items)
 					if (items) {
 						items.forEach((item) => {
 							// if (item.rank === 'species')
@@ -93,8 +86,6 @@ class Taxonomy {
 	updateConfigFile(filename) {
 		return null
 	}
-
-
 }
 
 

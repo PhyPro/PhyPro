@@ -4,23 +4,52 @@ let expect = require('chai').expect
 
 let Mist3Tax = require('./Mist3Handler.js').Taxonomy
 
-describe.only('Mist3Handler', function() {
+describe('Mist3Handler', function() {
 	it('must get genome given a certain ID', function() {
 		let taxid = 10
 		let mist3 = new Mist3Tax(taxid)
 		expect(mist3.taxonomyID).eql(taxid)
 	})
-	describe.only('makeJsonSubTree', function() {
+	describe('makeJsonSubTree', function() {
 		it('it should not break this', function() {
 			let taxid = 10
 			let mist3 = new Mist3Tax(taxid)
-			return	mist3.makeJsonTree().then(function(tree) {
-				console.log('end')
+			return	mist3.makeJsonTree().then(function() {
+				let expected = {
+					name: 10,
+					children: [
+						{
+							name: 1622269
+						},
+						{
+							name: 1134474
+						},
+						{
+							name: 155077,
+							children: [
+								{
+									name: 498211
+								}
+							]
+						},
+						{
+							name: 39650,
+							children: [
+								{
+									name: 126346,
+									children: [
+										{
+											name: 1209072
+										}
+									]
+								}
+							]
+						}
+					]
+				}
 				expect(mist3.jsonTree.children).to.not.undefined
+				expect(mist3.jsonTree).eql(expected)
 			})
 		})
-	})
-	describe('makeJsonTree', function() {
-		it('must get children of node')
 	})
 })
