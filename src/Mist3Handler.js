@@ -12,8 +12,9 @@ let httpOptions = {
 }
 
 class Taxonomy {
-	constructor(taxonomyID, options) {
+	constructor(taxonomyID, numberOfSpecies, options) {
 		this.taxonomyID = taxonomyID
+		this.numberOfSpecies = numberOfSpecies
 		this.options = options
 	}
 
