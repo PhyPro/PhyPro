@@ -3,6 +3,7 @@
 const http = require('http')
 const lodash = require('lodash')
 const Promise = require('bluebird')
+const TntTree = require('tnt.tree')
 
 let httpOptions = {
 	method: 'GET',
@@ -82,6 +83,16 @@ class Taxonomy {
 			})
 			req.end()
 		})
+	}
+
+	sampleTree() {
+		let jsonTree = lodash.cloneDeep(this.jsonTree)
+		let treeObj = new TntTree().data(jsonTree)
+		treeObj.root().get_all_nodes()
+			.forEach(function(node) {
+				if (node.is_leaf())
+					console.log(node.data().name)
+			})
 	}
 
 	updateConfigFile(filename) {

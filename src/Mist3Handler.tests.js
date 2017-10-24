@@ -11,7 +11,7 @@ describe('Mist3Handler', function() {
 		expect(mist3.taxonomyID).eql(taxid)
 	})
 	describe('makeJsonSubTree', function() {
-		it('it should not break this', function() {
+		it.only('it should not break this', function() {
 			let taxid = 10
 			let mist3 = new Mist3Tax(taxid)
 			return	mist3.makeJsonTree().then(function() {
@@ -47,6 +47,7 @@ describe('Mist3Handler', function() {
 						}
 					]
 				}
+				mist3.sampleTree()
 				expect(mist3.jsonTree.children).to.not.undefined
 				expect(mist3.jsonTree).eql(expected)
 			})
