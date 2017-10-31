@@ -31,8 +31,8 @@ function sampleGenomes_(treeObj, N) {
 		results = sampleTax.pick(N)
 	}
 	else {
-		if (N < numberOfGenomes)
-			log.warn('Number of genomes requested is smaller than the ones retrieved decendent from this taxonomy ID. Will return all of them.')
+		if (N > numberOfGenomes)
+			log.warn('Number of genomes requested is larger than the ones retrieved decendent from this taxonomy ID. Will return all of them.')
 		results = treeObj.root().get_all_leaves()
 	}
 	results.forEach((item) => {

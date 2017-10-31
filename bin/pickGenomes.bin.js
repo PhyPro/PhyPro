@@ -47,7 +47,7 @@ parser.addArgument(
 		help: 'Determine the name of the file to output a list of taxonomy IDs.',
 		nargs: 1,
 		metavar: ['filename.txt'],
-		default: 'pickGenomes.selection.json'
+		defaultValue: 'pickGenomes.selection.json'
 	}
 )
 
@@ -56,13 +56,14 @@ let args = parser.parseArgs()
 
 
 pickGenomes.pick(args.taxid[0], args.random[0]).then((taxids) => {
-	console.log(JSON.stringify(taxids))
 	if (args.updateConfig) {
-		let filename = 'phypro.' + args.updateConfig + '.config.json'
-		let configJSON = JSON.parse(fs.readFileSync(filename).toString())
-		console.log(configJSON)
+		let configFileName = 'phypro.' + args.updateConfig + '.config.json'
+		let configJSON = JSON.parse(fs.readFileSync(configFileName).toString())
 		configJSON['phylo-profile'].genomes = taxids
-		console.log(configJSON)
-		fs.writeFileSync(filename, JSON.stringify(configJSON, null, ' '))
+		fs.writeFileSync(configFileName, JSON.stringify(configJSON, null, ' '))
 	}
+	let outputFileName = args.output
+	if (typeof args.output === 'object')
+		outputFileName = args.output[0]
+	fs.writeFileSync(outputFileName, JSON.stringify(taxids, null, ' '))
 })

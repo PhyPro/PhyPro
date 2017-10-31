@@ -29,7 +29,6 @@ exports.getImmediateChildren = (taxid) => {
 			})
 			res.on('end', function() {
 				log.info('received information from taxid ' + taxid)
-				log.info(httpOptions.path)
 				let items = JSON.parse(Buffer.concat(chunks))
 				let taxids = []
 				if (items) {
