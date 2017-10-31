@@ -2,9 +2,10 @@
 'use strict'
 
 const path = require('path')
+const fs = require('fs')
 const ArgumentParser = require('argparse').ArgumentParser
 
-const Mist3Tax = require('../src/Mist3Handler.js').Taxonomy
+const pickGenomes = require('../src/pickGenomes.js')
 
 let parser = new ArgumentParser({
 	addHelp: true,
@@ -24,6 +25,7 @@ parser.addArgument(
 	{
 		help: 'Sample N genomes from the taxonomy tree. It picks representatives trying to maximize coverage of lineages',
 		nargs: 1,
+		defaultValue: 0,
 		metavar: ['N']
 	}
 )
@@ -31,7 +33,7 @@ parser.addArgument(
 parser.addArgument(
 	['--updateConfig'],
 	{
-		help: 'Automatically update the data to the correct place in the config file of the project. Must pass the project name and be in the project\'s root directory',
+		help: 'Automatically update the data to the correct place in the PhyPro config file of the project. Must pass the project name and be in the project\'s root directory',
 		nargs: 1,
 		metavar: [
 			'ProjectName'
@@ -44,15 +46,23 @@ parser.addArgument(
 	{
 		help: 'Determine the name of the file to output a list of taxonomy IDs.',
 		nargs: 1,
-		metavar: ['filename.txt']
+		metavar: ['filename.txt'],
+		default: 'pickGenomes.selection.json'
 	}
 )
 
 
 let args = parser.parseArgs()
 
-console.log(args.random[0])
 
-let mist3tax = new Mist3Tax(args.taxid[0], args.random[0])
-
-console.log(mist3tax.taxonomyID)
+pickGenomes.pick(args.taxid[0], args.random[0]).then((taxids) => {
+	console.log(JSON.stringify(taxids))
+	if (args.updateConfig) {
+		let filename = 'phypro.' + args.updateConfig + '.config.json'
+		let configJSON = JSON.parse(fs.readFileSync(filename).toString())
+		console.log(configJSON)
+		configJSON['phylo-profile'].genomes = taxids
+		console.log(configJSON)
+		fs.writeFileSync(filename, JSON.stringify(configJSON, null, ' '))
+	}
+})

@@ -4,11 +4,13 @@
   "description": "PhyPro - Advanced Phylogenetic Profile for Biologists",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_PATH=node_modules node_modules/.bin/nyc node_modules/.bin/mocha --reporter ${MOCHA_REPORTER-spec} $(find src -name '*tests.js')",
+    "test": "NODE_PATH=node_modules node_modules/.bin/mocha --reporter ${MOCHA_REPORTER-spec} $(find src -name '*tests.js')",
+    "nyc": "NODE_PATH=node_modules node_modules/.bin/nyc node_modules/.bin/mocha --reporter ${MOCHA_REPORTER-spec} $(find src -name '*tests.js')",
     "coverage": "NODE_PATH=node_modules node_modules/.bin/nyc report --reporter=text-lcov | coveralls"
   },
   "bin": {
-    "phypro": "./bin/cli-phypro.js"
+    "phypro": "./bin/cli-phypro.js",
+    "pickGenomes": "./bin/cli-pickGenomes.js"
   },
   "nyc": {
     "exclude": [
