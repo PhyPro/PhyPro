@@ -20,6 +20,8 @@ class PhyPro {
 		this.config = {}
 		this.config.header = {}
 		this.config.header.ProjectName = ProjectName !== '' ? ProjectName : 'ProjectName'
+		this.config.header.backgroundGenomes = []
+		this.config.header.referenceGenomes = []
 		this.log = bunyan.createLogger({name: 'PhyPro - ' + ProjectName})
 	}
 

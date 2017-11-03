@@ -18,8 +18,6 @@ class PhyloProfile extends Pipeline {
 		super({objectMode: true})
 		this.config.FQLSetsOfRules = []
 		this.config.trimRules = {}
-		this.config.genomes = []
-		this.config.referenceGenomes = []
 	}
 
 	keepGoing() {

@@ -2,7 +2,7 @@
 
 let expect = require('chai').expect
 
-let mist3 = require('./mist3Helper.js')
+let mist3 = require('./Mist3Helper.js')
 
 describe('Mist3Helper', function() {
 	it('it should pass', function() {

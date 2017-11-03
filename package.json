@@ -10,7 +10,7 @@
   },
   "bin": {
     "phypro": "./bin/cli-phypro.js",
-    "pickGenomes": "./bin/cli-pickGenomes.js"
+    "phypro-pickGenomes": "./bin/cli-pickGenomes.js"
   },
   "nyc": {
     "exclude": [

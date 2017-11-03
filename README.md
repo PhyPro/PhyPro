@@ -36,21 +36,32 @@ ProjectName/
 
 ## Configuring the config file
 
-The first thing we need to tell PhyPro is to determine the genomes in the scope of our phylogenetic profile. PhyPro is heavily integrated with MiST3 and uses taxonomy identifiers to identify the genomes.
+The config file has a `header` section where most of the higher level information is stored, and additional sections to every other pipeline. Currently, there are only two pipelines in the official PhyPro release: `phylo-profile` and `ref-tree`. Each section contains fields that must be completed to tell PhyPro what to do.
+
+### Selecting genomes.
+
+The power of phylogenetic profiles is enhanced when comparing the presence and abscence of 
+
+The first thing we need to tell PhyPro is to determine the genomes in the scope of our phylogenetic profile. PhyPro is heavily integrated with MiST3 and uses NCBI's taxonomy identifiers to identify the genomes. This information is placed in the `header` section under the keys `genomes` and `ref-genomes` because it is central to both pipelines.
+
+PhyPro will 
+
+
+
 
 However, it can be cumbersome to manually include each identifier number in the config file. For that reason, PhyPro has a helper command line application that allows the user to make somewhat complex queries to MiST3 database natively.
 
-The application is called `phypro-getGenomes`
+The application is called `phypro-pickGenomes`
 
-For example, let's suppose we want 100 genomes sampled from proteobacteria. `phypro-getGenomes` will try to balance the examples among the ranks below proteobacteria.
+For example, let's suppose we want 100 genomes sampled from proteobacteria. `phypro-pickGenomes` will try to balance the examples among the ranks below proteobacteria.
 
 However, the input node is the taxonomy identifier of that level and can be found at the [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy). For example, Proteobacteria's taxonomy id is `1224`.
 
 ```
-$ phypro-getGenomes -t 1224 -N 100 > protbac.100.taxID.dat
+$ phypro-pickGenomes 1224 --random 100 > protbac.100.taxID.dat
 ```
 
-This command will save to `protbac.100.taxID.dat` 100 randomly selected taxonomy ids from species under the taxonomic node of Protebacteria. `phypro-getGenomes` will try to spread the picks accross the taxonomic tree.
+This command will save to `protbac.100.taxID.dat` 100 randomly selected taxonomy ids from species under the taxonomic node of Protebacteria. `phypro-pickGenomes` will try to spread the picks accross the taxonomic tree.
 
 Conveniently, there is also the flag `--update` which will take the project name as an argument and will be pushed add the ids to the list already existent in the config file.
 

@@ -54,10 +54,20 @@ parser.addArgument(
 
 let args = parser.parseArgs()
 
+let configFileName = ''
+
+if (args.updateConfig) {
+	configFileName = 'phypro.' + args.updateConfig + '.config.json'
+	fs.stat(configFileName, (err, stat) => {
+		if (err) {
+			console.log('Error: We can\'t find the config file. check the project name or the directory you are in.')
+			process.exit(9)
+		}
+	})
+}
 
 pickGenomes.pick(args.taxid[0], args.random[0]).then((taxids) => {
 	if (args.updateConfig) {
-		let configFileName = 'phypro.' + args.updateConfig + '.config.json'
 		let configJSON = JSON.parse(fs.readFileSync(configFileName).toString())
 		configJSON['phylo-profile'].genomes = taxids
 		fs.writeFileSync(configFileName, JSON.stringify(configJSON, null, ' '))
