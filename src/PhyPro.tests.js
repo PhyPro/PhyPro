@@ -13,12 +13,15 @@ let expect = chai.expect
 let PhyPro = require('./PhyPro.js')
 
 const testPath = path.resolve(__dirname, 'test-data')
+const availablePipelines = require('../src/availablePipelines.json')
+const pipelines = Object.keys(availablePipelines)
 
 describe('PhyPro', function() {
 	describe('init function', function() {
 		beforeEach(function() {
-			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
-			rimraf.sync(path.resolve(testPath, 'ref-tree'))
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
 			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
 			let files = glob.glob.sync(configFilenamePattern)
 			files.forEach(function(file) {
@@ -31,24 +34,40 @@ describe('PhyPro', function() {
 			let phypro = new PhyPro(projectName)
 			phypro.init(testPath)
 			expect(testPath).to.be.a.directory().include.files([configFilename])
-			expect(path.resolve(testPath, 'phylo-profile')).to.be.a.directory()
-			expect(path.resolve(testPath, 'ref-tree')).to.be.a.directory()
+			pipelines.forEach((pipeline) => {
+				expect(path.resolve(testPath, pipeline)).to.be.a.directory()
+			})
 		})
 		it('should use generic ProjectName if no Project name is passed to constructor', function() {
 			let configFilename = 'phypro.ProjectName.config.json'
 			let phypro = new PhyPro()
 			phypro.init(testPath)
 			expect(testPath).to.be.a.directory().include.files([configFilename])
-			expect(path.resolve(testPath, 'phylo-profile')).to.be.a.directory()
-			expect(path.resolve(testPath, 'ref-tree')).to.be.a.directory()
+			pipelines.forEach((pipeline) => {
+				expect(path.resolve(testPath, pipeline)).to.be.a.directory()
+			})
+		})
+		it('must add the backgroundGenomes to header in config master configuration file.', function() {
+			let phypro = new PhyPro()
+			phypro.init(testPath)
+			expect(phypro.config.header.backgroundGenomes).to.not.be.undefined
+		})
+		it('must add the referenceGenomes to header in config master configuration file.', function() {
+			let phypro = new PhyPro()
+			phypro.init(testPath)
+			expect(phypro.config.header.referenceGenomes).to.not.be.undefined
 		})
 		it('must add the initial config information for each pipeline in the master configuration file.', function() {
 			let phypro = new PhyPro()
 			phypro.init(testPath)
+			pipelines.forEach((pipeline) => {
+				expect(phypro.config[pipeline]).to.not.be.undefined
+			})
 		})
 		afterEach(function() {
-			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
-			rimraf.sync(path.resolve(testPath, 'ref-tree'))
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
 			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
 			let files = glob.glob.sync(configFilenamePattern)
 			files.forEach(function(file) {
@@ -58,8 +77,9 @@ describe('PhyPro', function() {
 	})
 	describe('_isValidProjectStructure', function() {
 		beforeEach(function() {
-			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
-			rimraf.sync(path.resolve(testPath, 'ref-tree'))
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
 			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
 			let files = glob.glob.sync(configFilenamePattern)
 			files.forEach(function(file) {
@@ -74,8 +94,8 @@ describe('PhyPro', function() {
 			fs.unlinkSync('phypro.template.config.json')
 			expect(phypro._isValidProjectStructure.bind(phypro)).to.throw('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
 		})
-		it('must throw error if can\'t find phylo-profile directory', function() {
-			let missingPipeline = 'phylo-profile'
+		it('must throw error if can\'t find phyloProfile directory', function() {
+			let missingPipeline = 'phyloProfile'
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
 			process.chdir(testPath)
@@ -83,8 +103,8 @@ describe('PhyPro', function() {
 			rimraf.sync(path.resolve(testPath, missingPipeline))
 			expect(phypro._isValidProjectStructure.bind(phypro)).to.throw('The current directory does not have the ' + missingPipeline + ' folder. Please check if this is the correct directory.')
 		})
-		it('must throw error if can\'t find ref-tree directory', function() {
-			let missingPipeline = 'ref-tree'
+		it('must throw error if can\'t find refTree directory', function() {
+			let missingPipeline = 'refTree'
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
 			process.chdir(testPath)
@@ -102,8 +122,9 @@ describe('PhyPro', function() {
 			phypro._isValidProjectStructure()
 		})
 		afterEach(function() {
-			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
-			rimraf.sync(path.resolve(testPath, 'ref-tree'))
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
 			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
 			let files = glob.glob.sync(configFilenamePattern)
 			files.forEach(function(file) {
@@ -146,18 +167,24 @@ describe('PhyPro', function() {
 		it('throws error if does not have the right directory structure', function() {
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
-			expect(phypro.keepGoing.bind(phypro, 'ref-tree')).to.throw('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
+			pipelines.forEach((pipeline) => {
+				expect(phypro.keepGoing.bind(phypro, pipeline)).to.throw('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
+			})
 		})
 		it('It loads the standard config as default', function() {
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
 			process.chdir(testPath)
 			phypro.init()
-			phypro.keepGoing('ref-tree')
+			pipelines.forEach((pipeline) => {
+				phypro.keepGoing([pipeline])
+			})
 		})
+		it('must make sure that config file has been validated')
 		after(function() {
-			rimraf.sync(path.resolve(testPath, 'phylo-profile'))
-			rimraf.sync(path.resolve(testPath, 'ref-tree'))
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
 			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
 			let files = glob.glob.sync(configFilenamePattern)
 			files.forEach(function(file) {

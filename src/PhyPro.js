@@ -20,6 +20,8 @@ class PhyPro {
 		this.config = {}
 		this.config.header = {}
 		this.config.header.ProjectName = ProjectName !== '' ? ProjectName : 'ProjectName'
+		this.config.header.backgroundGenomes = []
+		this.config.header.referenceGenomes = []
 		this.log = bunyan.createLogger({name: 'PhyPro - ' + ProjectName})
 	}
 
@@ -45,10 +47,14 @@ class PhyPro {
 		console.log('Everything looks good, now you must config the config file and run this command again with the flag --keepgoing followed by the pipeline(s) you want to start running. You can run multiple pipelines as once, PhyPro will grab N-1 processors from your computer and divide equally between the tasks. For efficiency in big jobs, try running one pipeline at the time.')
 	}
 
+	validateConfig() {
+		return null
+	}
+
 	keepGoing(pipelineChoices) {
 		this._isValidProjectStructure()
 		this._loadConfig()
-		pipelines.forEach((pipeline) => {
+		pipelineChoices.forEach((pipeline) => {
 			let PipeInstance = eval(availablePipelines[pipeline].start),
 				pipeInstance = new PipeInstance()
 			pipeInstance.loadConfig(this.config[pipeline])
