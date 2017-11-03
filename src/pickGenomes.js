@@ -36,7 +36,11 @@ function sampleGenomes_(treeObj, N) {
 		results = treeObj.root().get_all_leaves()
 	}
 	results.forEach((item) => {
-		selectTaxIDs.push(item.property('id'))
+		let taxData = {
+			taxid: item.property('id'),
+			name: item.property('name')
+		}
+		selectTaxIDs.push(taxData)
 	})
 	return selectTaxIDs
 }

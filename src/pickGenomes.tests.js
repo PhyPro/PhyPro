@@ -33,8 +33,10 @@ describe('pickGenomes', function() {
 	it('must return an Array of numbers when N is not passed', function() {
 		let taxid = 10
 		return pickGenomes.pick(taxid).then(function(taxids) {
-			taxids.forEach(function(id) {
-				expect(id).to.be.a('number')
+			console.log(taxids)
+			taxids.forEach(function(item) {
+				expect(item.taxid).to.be.a('number')
+				expect(item.name).to.be.a('string')
 			})
 		})
 	})
@@ -42,8 +44,9 @@ describe('pickGenomes', function() {
 		let taxid = 10
 		let N = 3
 		return pickGenomes.pick(taxid, N).then(function(taxids) {
-			taxids.forEach(function(id) {
-				expect(id).to.be.a('number')
+			taxids.forEach(function(item) {
+				expect(item.taxid).to.be.a('number')
+				expect(item.name).to.be.a('string')
 			})
 		})
 	})

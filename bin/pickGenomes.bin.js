@@ -69,7 +69,14 @@ if (args.updateConfig) {
 pickGenomes.pick(args.taxid[0], args.random[0]).then((taxids) => {
 	if (args.updateConfig) {
 		let configJSON = JSON.parse(fs.readFileSync(configFileName).toString())
-		configJSON['phylo-profile'].genomes = taxids
+		if (configJSON.header.backgroundGenomes.length === 0) {
+			configJSON.header.backgroundGenomes = taxids
+		}
+		else {
+			taxids.forEach((taxid) => {
+				configJSON.header.backgroundGenomes.push(taxid)
+			})
+		}
 		fs.writeFileSync(configFileName, JSON.stringify(configJSON, null, ' '))
 	}
 	let outputFileName = args.output
