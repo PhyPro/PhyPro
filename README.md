@@ -69,7 +69,7 @@ $ phypro-pickGenomes 1224 --random 100
 
 This command will save to `pickGenomes.selection.json` 100 randomly selected taxonomy ids from species under the taxonomic node of Protebacteria. `phypro-pickGenomes` will try to spread the picks across the taxonomic tree.
 
-Conveniently, there is also the flag `--updateConfig` which will take the project name as an argument and will be push the ids to the list already existent in the config file.
+Conveniently, there is also the flag `--update-config` which will take the project name as an argument and will be push the ids to the list already existent in the config file.
 
 ### Selecting reference Genomes
 
@@ -94,14 +94,10 @@ There are two ways to fill that, one is to manually insert the taxonomy ids. The
 ]
 ```
 
-and use the phypro command line helper `phypro-load-refgenomes` to include it in the config file, like this:
+As in the background genomes, PhyPro does not care of any of the fields but the `taxid`. Thus, it might be useful to keep notes about each of the reference genome and etc.
 
-```
-$ phypro-load-refgenomes ProjectName my_genomes.json
-```
-PhyPro does not care of any of the fields in this file but the `taxid`. Thus, it might be useful to keep notes about each of the reference genome and etc.
+One way to easily keep this information is to place they reference genomes in a separate json file and copy and paste the contents in the `referenceGenomes` field in the config file.
 
-Finally, PhyPro will safely include any reference genomes that was not listed in the genomes list but will not duplicate them.
 
 ## Validate config file
 
@@ -112,6 +108,8 @@ $ phypro --validate-config ProjectName
 ```
 
 It will try to be as informative as possible about any issue the config file might have.
+
+It will also check the list of genomes and make sure that there is no duplicates in both background and reference genomes. In case of duplicates, PhyPro will give preference to the genome in the reference genomes.
 
 ## Keep going
 

@@ -3,6 +3,7 @@
 const bunyan = require('bunyan')
 const Promise = require('bluebird')
 const TntTree = require('tnt.tree')
+const fs = require('fs')
 
 const mist3 = require('./Mist3Helper.js')
 const SampleTaxonomy = require('./SampleTaxonomy.js')
@@ -19,6 +20,21 @@ exports.pick = (taxonomyID, N = 0) => {
 			res(selected)
 		})
 	})
+}
+
+exports.updatePhyProConfig = (configFileName, taxids) => {
+	log.info('Updating config file: ' + configFileName)
+	let configJSON = JSON.parse(fs.readFileSync(configFileName).toString())
+	if (configJSON.header.backgroundGenomes.length === 0) {
+		configJSON.header.backgroundGenomes = taxids
+	}
+	else {
+		log.warn('Found existing taxids, will add the new ones.')
+		taxids.forEach((taxid) => {
+			configJSON.header.backgroundGenomes.push(taxid)
+		})
+	}
+	fs.writeFileSync(configFileName, JSON.stringify(configJSON, null, ' '))
 }
 
 function sampleGenomes_(treeObj, N) {

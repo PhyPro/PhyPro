@@ -31,7 +31,7 @@ parser.addArgument(
 )
 
 parser.addArgument(
-	['--updateConfig'],
+	['--update-config'],
 	{
 		help: 'Automatically update the data to the correct place in the PhyPro config file of the project. Must pass the project name and be in the project\'s root directory',
 		nargs: 1,
@@ -56,8 +56,8 @@ let args = parser.parseArgs()
 
 let configFileName = ''
 
-if (args.updateConfig) {
-	configFileName = 'phypro.' + args.updateConfig + '.config.json'
+if (args.update_config) {
+	configFileName = 'phypro.' + args.update_config + '.config.json'
 	fs.stat(configFileName, (err, stat) => {
 		if (err) {
 			console.log('Error: We can\'t find the config file. check the project name or the directory you are in.')
@@ -67,17 +67,8 @@ if (args.updateConfig) {
 }
 
 pickGenomes.pick(args.taxid[0], args.random[0]).then((taxids) => {
-	if (args.updateConfig) {
-		let configJSON = JSON.parse(fs.readFileSync(configFileName).toString())
-		if (configJSON.header.backgroundGenomes.length === 0) {
-			configJSON.header.backgroundGenomes = taxids
-		}
-		else {
-			taxids.forEach((taxid) => {
-				configJSON.header.backgroundGenomes.push(taxid)
-			})
-		}
-		fs.writeFileSync(configFileName, JSON.stringify(configJSON, null, ' '))
+	if (args.update_config) {
+		pickGenomes.updatePhyProConfig(configFileName, taxids)
 	}
 	let outputFileName = args.output
 	if (typeof args.output === 'object')

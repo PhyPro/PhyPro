@@ -1,8 +1,17 @@
 'use strict'
 
-let expect = require('chai').expect
+const expect = require('chai').expect
+const path = require('path')
+const fs = require('fs')
+const glob = require('glob')
+const rimraf = require('rimraf')
 
-let pickGenomes = require('./pickGenomes.js')
+const testPath = path.resolve(__dirname, 'test-data')
+const availablePipelines = require('../src/availablePipelines.json')
+const pipelines = Object.keys(availablePipelines)
+
+const pickGenomes = require('./pickGenomes.js')
+const PhyPro = require('./PhyPro.js')
 
 describe('pickGenomes', function() {
 	it('must not be undefined and to be an Array when no N is passed', function() {
@@ -58,6 +67,55 @@ describe('pickGenomes', function() {
 			expect(taxids).to.not.be.undefined
 			expect(taxids).to.be.an('array')
 			expect(taxids.length).eql(N)
+		})
+	})
+	describe('updateConfig', function() {
+		beforeEach(function() {
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
+			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
+			let files = glob.glob.sync(configFilenamePattern)
+			files.forEach(function(file) {
+				fs.unlinkSync(file)
+			})
+		})
+		it('should update the config file ', function() {
+			let taxid = 10
+			let N = 3
+			let projectName = 'template'
+			let configFilename = path.resolve(testPath, 'phypro.template.config.json')
+			let phypro = new PhyPro(projectName)
+			phypro.init(testPath)
+			return pickGenomes.pick(taxid, N).then(function(taxids) {
+				pickGenomes.updatePhyProConfig(configFilename, taxids)
+				let configJSON = JSON.parse(fs.readFileSync(configFilename).toString())
+				expect(configJSON.header.backgroundGenomes.length).eql(3)
+			})
+		})
+		it('should add to existing taxids in the config file ', function() {
+			let taxid = 10
+			let N = 3
+			let projectName = 'template'
+			let configFilename = path.resolve(testPath, 'phypro.template.config.json')
+			let phypro = new PhyPro(projectName)
+			phypro.init(testPath)
+			return pickGenomes.pick(taxid, N).then(function(taxids) {
+				pickGenomes.updatePhyProConfig(configFilename, taxids)
+				pickGenomes.updatePhyProConfig(configFilename, taxids)
+				let configJSON = JSON.parse(fs.readFileSync(configFilename).toString())
+				expect(configJSON.header.backgroundGenomes.length).eql(N + N)
+			})
+		})
+		afterEach(function() {
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
+			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
+			let files = glob.glob.sync(configFilenamePattern)
+			files.forEach(function(file) {
+				fs.unlinkSync(file)
+			})
 		})
 	})
 })
