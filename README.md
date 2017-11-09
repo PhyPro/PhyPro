@@ -1,7 +1,7 @@
 # PhyPro - Advanced Phylogenetic Profile for Biologists
 
-[![Build Status](https://travis-ci.org/PhyPro/PhyPro.svg?branch=develop)](https://travis-ci.org/PhyPro/PhyPro)
-[![Coverage Status](https://coveralls.io/repos/github/PhyPro/PhyPro/badge.svg?branch=develop)](https://coveralls.io/github/PhyPro/PhyPro?branch=develop)
+[![Build Status](https://travis-ci.org/PhyPro/phypro.svg?branch=develop)](https://travis-ci.org/PhyPro/phypro)
+[![Coverage Status](https://coveralls.io/repos/github/PhyPro/phypro/badge.svg?branch=develop)](https://coveralls.io/github/PhyPro/phypro?branch=develop)
 
 This is the javascript implementation of PhyPro.
 
