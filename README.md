@@ -75,13 +75,17 @@ Conveniently, there is also the flag `--update-config` which will take the proje
 
 We may want to know more about systems from specific organisms. For that, we have the `referenceGenomes` field in the config file.
 
-There are two ways to fill that, one is to manually insert the taxonomy ids. The second way is to provide a `json` file with the information.
+There is no automated way to fill this section as they should be carefully curated. Ideally, we would keep a `json` file with the information about the genomes of interest and copy its contents to the config file.
+
+This is an example of how to organize the information about the genomes of interest.
 
 ```json
 [
     {
         "name": "Legionella pneumophila subsp. pneumophila str. Philadelphia 1",
-        "taxid": 272624
+        "taxid": 272624,
+        "pathogen": true,
+        "collaborator": "John Doe"
     },
     {
         "name": "Myxococcus xanthus DK 1622",
@@ -94,22 +98,28 @@ There are two ways to fill that, one is to manually insert the taxonomy ids. The
 ]
 ```
 
-As in the background genomes, PhyPro does not care of any of the fields but the `taxid`. Thus, it might be useful to keep notes about each of the reference genome and etc.
-
-One way to easily keep this information is to place they reference genomes in a separate json file and copy and paste the contents in the `referenceGenomes` field in the config file.
-
+As in the background genomes, PhyPro does not care of any of the fields but the `taxid` and `name`. Thus, it might be useful to keep notes about each of the reference genome and etc. 
 
 ## Validate config file
 
-To avoid wasting time, before we start the pipelines, PhyPro will ask to validade the config file and inform of any mistaken we might have made:
+To avoid wasting time, before we start the pipelines, PhyPro will ask to validate the config file and inform of any mistaken we might have made:
 
 ```
 $ phypro --validate-config ProjectName
 ```
 
-It will try to be as informative as possible about any issue the config file might have.
+It will try to be as informative as possible about any issue the config file might have. However, there are two special sections that are more error prone and PhyPro naturally pays more attention to them:
 
-It will also check the list of genomes and make sure that there is no duplicates in both background and reference genomes. In case of duplicates, PhyPro will give preference to the genome in the reference genomes.
+
+### Validating backgroundGenomes and referenceGenomes
+
+First, PhyPro will parse the `*Genomes` and make sure that the information in these two sections of the config file are sound.
+
+First, since not all taxonomy IDs from the NCBI are in the MiST3 database, PhyPro will validate each taxid number against the database and let us know if there is any problem with that. Also, if we make a mistake in the field `name`, PhyPro will correct that and place the old value of this field under the key `nameByUser`. For this reason, we don't need to complete the field `name` ourselves as PhyPro will complete it for us during the validation process.
+
+### Validating PFQL rules
+
+**TODO**
 
 ## Keep going
 

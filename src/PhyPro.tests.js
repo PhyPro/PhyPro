@@ -47,21 +47,24 @@ describe('PhyPro', function() {
 				expect(path.resolve(testPath, pipeline)).to.be.a.directory()
 			})
 		})
-		it('must add the backgroundGenomes to header in config master configuration file.', function() {
+		it('should add the background to header.genomes in config master configuration file.', function() {
 			let phypro = new PhyPro()
 			phypro.init(testPath)
-			expect(phypro.config.header.backgroundGenomes).to.not.be.undefined
+			const config = phypro.config()
+			expect(config.header.genomes.background).to.not.be.undefined
 		})
-		it('must add the referenceGenomes to header in config master configuration file.', function() {
+		it('should add the reference to header.genomes in config master configuration file.', function() {
 			let phypro = new PhyPro()
 			phypro.init(testPath)
-			expect(phypro.config.header.referenceGenomes).to.not.be.undefined
+			const config = phypro.config()
+			expect(config.header.genomes.reference).to.not.be.undefined
 		})
-		it('must add the initial config information for each pipeline in the master configuration file.', function() {
+		it('should add the initial config information for each pipeline in the master configuration file.', function() {
 			let phypro = new PhyPro()
 			phypro.init(testPath)
 			pipelines.forEach((pipeline) => {
-				expect(phypro.config[pipeline]).to.not.be.undefined
+				const config = phypro.config()
+				expect(config[pipeline]).to.not.be.undefined
 			})
 		})
 		afterEach(function() {
@@ -86,7 +89,7 @@ describe('PhyPro', function() {
 				fs.unlinkSync(file)
 			})
 		})
-		it('must throw error if can\'t find config file', function() {
+		it('should throw error if can\'t find config file', function() {
 			let projectName = 'template'
 			process.chdir(testPath)
 			let phypro = new PhyPro(projectName)
@@ -94,7 +97,7 @@ describe('PhyPro', function() {
 			fs.unlinkSync('phypro.template.config.json')
 			expect(phypro._isValidProjectStructure.bind(phypro)).to.throw('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
 		})
-		it('must throw error if can\'t find phyloProfile directory', function() {
+		it('should throw error if can\'t find phyloProfile directory', function() {
 			let missingPipeline = 'phyloProfile'
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
@@ -103,7 +106,7 @@ describe('PhyPro', function() {
 			rimraf.sync(path.resolve(testPath, missingPipeline))
 			expect(phypro._isValidProjectStructure.bind(phypro)).to.throw('The current directory does not have the ' + missingPipeline + ' folder. Please check if this is the correct directory.')
 		})
-		it('must throw error if can\'t find refTree directory', function() {
+		it('should throw error if can\'t find refTree directory', function() {
 			let missingPipeline = 'refTree'
 			let projectName = 'template'
 			let phypro = new PhyPro(projectName)
@@ -132,23 +135,27 @@ describe('PhyPro', function() {
 			})
 		})
 	})
-	describe('_loadConfig function', function() {
-		it('must load config from file', function() {
+	describe('_loadConfigFile function', function() {
+		it('should load any valid json as config from file', function() {
 			let configContent = {
 				header: {
 					ProjectName: 'template',
-					initDate: 'Sat Oct 14 2017 12:58:45 GMT-0700 (PDT)'
+					history: {
+						initDate: 'Sat Oct 14 2017 12:58:45 GMT-0700 (PDT)'
+					}
 				},
 				phyloprofile: {},
-				tree: {}
+				tree: {},
+				empty: false
 			}
 			let projectName = 'template'
 			let configFilename = 'loadConfig.phypro.template.config.json'
 			let phypro = new PhyPro(projectName)
-			phypro._loadConfig(path.resolve(testPath, configFilename))
-			expect(phypro.config).eql(configContent)
+			phypro._loadConfigFile(path.resolve(testPath, configFilename))
+			const config = phypro.config()
+			expect(config).eql(configContent)
 		})
-		it('must throw error if file is corrupted', function() {
+		it('should throw error if file is corrupted', function() {
 			let configContent = {
 				header: {
 					ProjectName: 'template',
@@ -160,7 +167,7 @@ describe('PhyPro', function() {
 			let projectName = 'template'
 			let configFilename = 'corrupted.phypro.template.config.json'
 			let phypro = new PhyPro(projectName)
-			expect(phypro._loadConfig.bind(phypro, path.resolve(testPath, configFilename))).to.throw('The config file exists but it seems to be corrupted.')
+			expect(phypro._loadConfigFile.bind(phypro, path.resolve(testPath, configFilename))).to.throw('The config file exists but it seems to be corrupted.')
 		})
 	})
 	describe('keepgoing function', function() {
@@ -180,7 +187,7 @@ describe('PhyPro', function() {
 				phypro.keepGoing([pipeline])
 			})
 		})
-		it('must make sure that config file has been validated')
+		it('should make sure that config file has been validated')
 		after(function() {
 			pipelines.forEach((pipeline) => {
 				rimraf.sync(path.resolve(testPath, pipeline))

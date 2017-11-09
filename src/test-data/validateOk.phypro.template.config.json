@@ -1,0 +1,43 @@
+{
+ "header": {
+  "ProjectName": "t4p",
+  "backgroundGenomes": [
+   {
+    "taxid": 1622269,
+    "name": "Cellvibrio sp. pealriver"
+   },
+   {
+    "taxid": 1134474,
+    "name": "Cellvibrio sp. BR"
+   },
+   {
+    "taxid": 498211,
+    "name": "Cellvibrio japonicus Ueda107"
+   },
+   {
+    "taxid": 1209072,
+    "name": "Cellvibrio mixtus subsp. mixtus J3-8"
+   }
+  ],
+  "referenceGenomes": [],
+  "initDate": "Mon Nov 06 2017 18:07:03 GMT-0800 (PST)"
+ },
+ "phyloProfile": {
+  "history": {},
+  "stage": "init",
+  "stop": "",
+  "FQLSetsOfRules": [],
+  "trimRules": {}
+ },
+ "refTree": {
+  "history": {},
+  "stage": "init",
+  "stop": "",
+  "gblockRules": {},
+  "phylogeny": {
+   "software": "",
+   "settings": ""
+  },
+  "cdds": []
+ }
+}
