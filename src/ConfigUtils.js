@@ -65,8 +65,8 @@ class ConfigUtils {
 	}
 
 	checkGenomes_() {
-		this.checkStructureOfGenomes('background')
-		this.checkStructureOfGenomes('reference')
+		this.checkStructureOfGenomes_('background')
+		this.checkStructureOfGenomes_('reference')
 	}
 
 	updateTaxInfoMiST_(type) {
@@ -113,7 +113,6 @@ class ConfigUtils {
 				throw new Error('This item is neither a Number or an Object: ' + JSON.stringify(item))
 			}
 			else if (item.constructor === Object) {
-				console.log(item)
 				let keys = Object.keys(item)
 				if (keys.indexOf('taxid') === -1)
 					throw new Error('Genome taxonomy object missing "taxid" key.\n Offending item is: ' + JSON.stringify(item))

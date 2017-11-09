@@ -21,12 +21,12 @@ describe('ConfigUtils', function() {
 		})
 	})
 	describe('validate()', function() {
-		it(' throw error if session "header" is missing', function() {
+		it('throws error if session "header" is missing', function() {
 			let config = {other: ''}
 			const configUtils = new ConfigUtils(config)
 			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header section')
 		})
-		it(' throw error if session "header.ProjectName" is missing', function() {
+		it('throws error if session "header.ProjectName" is missing', function() {
 			let config = {
 				header: {
 					genomes: {}
@@ -35,7 +35,7 @@ describe('ConfigUtils', function() {
 			const configUtils = new ConfigUtils(config)
 			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.ProjectName section')
 		})
-		it(' throw error if session "header.ProjectName" is missing', function() {
+		it('throws error if session "header.ProjectName" is missing', function() {
 			let config = {
 				header: {
 					genomes: {}
@@ -44,7 +44,7 @@ describe('ConfigUtils', function() {
 			const configUtils = new ConfigUtils(config)
 			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.ProjectName section')
 		})
-		it(' throw error if session "header.genomes" is missing', function() {
+		it('throws error if session "header.genomes" is missing', function() {
 			let config = {
 				header: {
 					ProjectName: 'template'
@@ -53,7 +53,7 @@ describe('ConfigUtils', function() {
 			const configUtils = new ConfigUtils(config)
 			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.genomes section')
 		})
-		it(' throw error if session "header.genomes.background" is missing', function() {
+		it('throws error if session "header.genomes.background" is missing', function() {
 			let config = {
 				header: {
 					ProjectName: 'template',
@@ -65,7 +65,7 @@ describe('ConfigUtils', function() {
 			const configUtils = new ConfigUtils(config)
 			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.genomes.background section')
 		})
-		it(' throw error if session "header.genomes.reference" is missing', function() {
+		it('throws error if session "header.genomes.reference" is missing', function() {
 			let config = {
 				header: {
 					ProjectName: 'template',
@@ -76,6 +76,70 @@ describe('ConfigUtils', function() {
 			}
 			const configUtils = new ConfigUtils(config)
 			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.genomes.reference section')
+		})
+		it('should throw error if item in background and reference are not Numbers or Objects', function() {
+			let config = {
+				header: {
+					ProjectName: 'template',
+					genomes: {
+						background: [
+							'121'
+						],
+						reference: []
+					}
+				}
+			}
+			const configUtils = new ConfigUtils(config)
+			expect(configUtils.validate.bind(configUtils)).to.throw('This item is neither a Number or an Object: "121"')
+		})
+		it('should throw error if item in background and reference are not Numbers or Objects', function() {
+			let config = {
+				header: {
+					ProjectName: 'template',
+					genomes: {
+						background: [
+							[1]
+						],
+						reference: []
+					}
+				}
+			}
+			const configUtils = new ConfigUtils(config)
+			expect(configUtils.validate.bind(configUtils)).to.throw('This item is neither a Number or an Object: [1]')
+		})
+		it('should throw error if Object in background does not have a the key "taxid"', function() {
+			let config = {
+				header: {
+					ProjectName: 'template',
+					genomes: {
+						background: [
+							{
+								name: 'my bug'
+							}
+						],
+						reference: []
+					}
+				}
+			}
+			const configUtils = new ConfigUtils(config)
+			expect(configUtils.validate.bind(configUtils)).to.throw('Genome taxonomy object missing "taxid" key.\n Offending item is: {"name":"my bug"}')
+		})
+		it('should throw error if Object in reference does not have a the key "taxid"', function() {
+			let config = {
+				header: {
+					ProjectName: 'template',
+					genomes: {
+						reference: [
+							{
+								name: 'my bug'
+							}
+						],
+						background: []
+					}
+				}
+			}
+			const configUtils = new ConfigUtils(config)
+			expect(configUtils.validate.bind(configUtils)).to.throw('Genome taxonomy object missing "taxid" key.\n Offending item is: {"name":"my bug"}')
 		})
 	})
 	describe('fixDuplicates()', function() {
@@ -170,7 +234,6 @@ describe('ConfigUtils', function() {
 			const configUtils = new ConfigUtils(config)
 			return configUtils.update().then()
 				.catch(function(err) {
-					console.log(err)
 					expect(err.message).to.equal('Invalid Taxid. The taxid 10 does not belong to a genome in MiST database.')
 				})
 		})
@@ -229,7 +292,6 @@ describe('ConfigUtils', function() {
 			const configUtils = new ConfigUtils(config)
 			return configUtils.update().then(() => {
 				const newConfig = configUtils.config()
-				console.log(newConfig.header.genomes)
 				expect(newConfig.header.genomes).eql(expectedGenomes)
 			})
 		})

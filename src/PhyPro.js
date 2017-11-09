@@ -79,8 +79,12 @@ class PhyPro {
 	updateConfig() {
 		const configUtils = new ConfigUtils(this.config_)
 		configUtils.fixDuplicates()
-		configUtils.update()
-		this.config_ = configUtils.config()
+		return configUtils.update().then(() => {
+			this.config_ = configUtils.config()
+		}).catch((err) => {
+			console.log(err)
+			throw new Error(err)
+		})
 	}
 
 	keepGoing(pipelineChoices) {

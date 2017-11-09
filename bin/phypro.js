@@ -60,8 +60,12 @@ if (args.init) {
 	phypro.init()
 }
 else if (args.validate_config) {
-	phypro._loadConfig()
+	phypro.loadConfigFile()
 	phypro.validateConfig()
+	phypro.updateConfig().then(() => {
+		const config = phypro.config()
+		console.log(JSON.stringify(config.header.genomes, null, ' '))
+	})
 }
 else {
 	phypro.keepGoing(args.keep_going)
