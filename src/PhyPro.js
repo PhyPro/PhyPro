@@ -58,6 +58,19 @@ class PhyPro {
 		console.log('Everything looks good, now you must config the config file and run this command again with the flag --keepgoing followed by the pipeline(s) you want to start running. You can run multiple pipelines as once, PhyPro will grab N-1 processors from your computer and divide equally between the tasks. For efficiency in big jobs, try running one pipeline at the time.')
 	}
 
+	loadConfigFile(configFilename) {
+		let filename = configFilename ? configFilename : 'phypro.' + this.config_.header.ProjectName + '.config.json'
+		try {
+			let config = jsonfile.readFileSync(filename, 'utf8')
+			this.config_ = config
+			this.config_.empty = false
+			this.log.info('Config loaded successfully')
+		}
+		catch (err) {
+			throw new Error('The config file exists but it seems to be corrupted.')
+		}
+	}
+
 	validateConfig() {
 		const configUtils = new ConfigUtils(this.config_)
 		configUtils.validate()
@@ -71,9 +84,9 @@ class PhyPro {
 	}
 
 	keepGoing(pipelineChoices) {
-		this._isValidProjectStructure()
+		this.isValidProjectStructure_()
 		if (this.config_.empty)
-			this._loadConfigFile()
+			this.loadConfigFile()
 		pipelineChoices.forEach((pipeline) => {
 			let PipeInstance = eval(availablePipelines[pipeline].start),
 				pipeInstance = new PipeInstance()
@@ -83,7 +96,7 @@ class PhyPro {
 		})
 	}
 
-	_checkStructureOfConfig() {
+	checkStructureOfConfig_() {
 		if (!(this.config_.header))
 			throw new Error('No (or misplaced) mandatory header section')
 		if (!(this.config_.header.ProjectName))
@@ -97,7 +110,7 @@ class PhyPro {
 		})
 	}
 
-	_isValidProjectStructure() {
+	isValidProjectStructure_() {
 		if (!(fs.existsSync('phypro.' + this.config_.header.ProjectName + '.config.json')))
 			throw new Error('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
 		pipelines.forEach((pipeline) => {
@@ -105,18 +118,5 @@ class PhyPro {
 				throw new Error('The current directory does not have the ' + pipeline + ' folder. Please check if this is the correct directory.')
 		})
 		this.log.info('Project structure seems ok :)')
-	}
-
-	_loadConfigFile(configFilename) {
-		let filename = configFilename ? configFilename : 'phypro.' + this.config_.header.ProjectName + '.config.json'
-		try {
-			let config = jsonfile.readFileSync(filename, 'utf8')
-			this.config_ = config
-			this.config_.empty = false
-			this.log.info('Config loaded successfully')
-		}
-		catch (err) {
-			throw new Error('The config file exists but it seems to be corrupted.')
-		}
 	}
 }
