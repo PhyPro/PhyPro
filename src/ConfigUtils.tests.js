@@ -321,4 +321,42 @@ describe('ConfigUtils', function() {
 			})
 		})
 	})
+	describe('checkPfqlRules_', function() {
+		it('should re-throw error from PFQL', function() {
+			const rules = [
+				{
+					rules: [
+						{
+							Npos: [
+								{
+									resource: 'pfam30',
+									feasture: 'Secretin'
+								}
+							]
+						}
+					]
+				}
+			]
+			const configUtils = new ConfigUtils({})
+			expect(configUtils.checkPfqlRules_.bind(configUtils, rules)).to.throw('Each Npos rule must explicitly define a feature: \n{"resource":"pfam30","feasture":"Secretin"}')
+		})
+		it('correct rules must pass', function() {
+			const rules = [
+				{
+					rules: [
+						{
+							Npos: [
+								{
+									resource: 'pfam30',
+									feature: 'Secretin'
+								}
+							]
+						}
+					]
+				}
+			]
+			const configUtils = new ConfigUtils({})
+			expect(configUtils.checkPfqlRules_.bind(configUtils, rules)).to.not.throw()
+		})
+	})
 })

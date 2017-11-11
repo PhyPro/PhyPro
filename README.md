@@ -100,12 +100,23 @@ This is an example of how to organize the information about the genomes of inter
 
 As in the background genomes, PhyPro does not care of any of the fields but the `taxid` and `name`. Thus, it might be useful to keep notes about each of the reference genome and etc. 
 
+### Defining protein families
+
+There are many ways to search for a certain protein family computationally. PhyPro builds up on another tool called PFQL - Protein Feature Query Language to perform this task more robustly. PFQL is able to filter proteins that has a specific feature architecture. It is called "feature" because it is a generalization of domain architecture. So PhyPro expects us to defiine a protein family by explicitly writing PFQL rules that defines a protein family.
+
+These rules are writen in the config file under the key: `phyloProfile.PfqlDefinitions`
+
+Please read the documentation on PFQL [here](https://github.com/biowonks/pfql/blob/master/manual.md)
+
+### Defining CDDs
+
+
 ## Validate config file
 
 To avoid wasting time, before we start the pipelines, PhyPro will ask to validate the config file and inform of any mistaken we might have made:
 
 ```
-$ phypro --validate-config ProjectName
+$ phypro --check-config ProjectName
 ```
 
 It will try to be as informative as possible about any issue the config file might have. However, there are two special sections that are more error prone and PhyPro naturally pays more attention to them:
@@ -119,7 +130,8 @@ First, since not all taxonomy IDs from the NCBI are in the MiST3 database, PhyPr
 
 ### Validating PFQL rules
 
-**TODO**
+PFQL rules will be validated by loading them up to a temporary PFQL instance. It will throw any problems with the rules that PFQL finds it. If you find a problem with the PFQL rule that was not cought, please contact the PFQL team in their [issue tracker](https://github.com/biowonks/pfql/issues).
+
 
 ## Keep going
 

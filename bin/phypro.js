@@ -32,9 +32,9 @@ parser.addArgument(
 )
 
 parser.addArgument(
-	['--validate-config'],
+	['--check-config'],
 	{
-		help: 'Validates existing config.',
+		help: 'Validate and update existing config file.',
 		nargs: 0
 	}
 )
@@ -59,13 +59,16 @@ let phypro = new PhyPro(ProjectName)
 if (args.init) {
 	phypro.init()
 }
-else if (args.validate_config) {
+else if (args.check_config) {
 	phypro.loadConfigFile()
 	phypro.validateConfig()
 	phypro.updateConfig().then(() => {
 		const config = phypro.config()
-		console.log(JSON.stringify(config.header.genomes, null, ' '))
+		phypro.logInfo('Config was updated with information and it seems good to go.')
 	})
+		.catch((err) => {
+			console.log(err)
+		})
 }
 else {
 	phypro.keepGoing(args.keep_going)

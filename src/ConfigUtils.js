@@ -3,12 +3,14 @@
 const bunyan = require('bunyan')
 
 const mist3 = require('./Mist3Helper.js')
+const pfql = require('pfql')
 
 module.exports =
 class ConfigUtils {
 	constructor(config) {
 		this.config_ = config
 		this.taxids_ = []
+		this.log = bunyan.createLogger({name: 'ConfigUtils'})
 	}
 
 	config() {
@@ -18,6 +20,7 @@ class ConfigUtils {
 	validate() {
 		this.checkStructureOfConfig_()
 		this.checkGenomes_()
+		this.checkPfqlRules_(this.config_.phyloProfile.PfqlDefinitions)
 	}
 
 	fixDuplicates() {
@@ -120,5 +123,15 @@ class ConfigUtils {
 					throw new Error('This item does not contain a valid taxid. Taxids should be an integer Number.\n Offending item is ' + JSON.stringify(item))
 			}
 		})
+	}
+
+	checkPfqlRules_(rules) {
+		const pfqlService = new pfql.PFQLService(rules)
+		try {
+			pfqlService.initRules()
+		}
+		catch (err) {
+			throw new Error(err.message)
+		}
 	}
 }

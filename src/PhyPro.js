@@ -81,6 +81,11 @@ class PhyPro {
 		configUtils.fixDuplicates()
 		return configUtils.update().then(() => {
 			this.config_ = configUtils.config()
+			let N = 0
+			Object.keys(this.config_.header.genomes).forEach((type) => {
+				N += this.config_.header.genomes[type].length
+			})
+			this.log.info('There are ' + N + ' genomes in your config file')
 		}).catch((err) => {
 			console.log(err)
 			throw new Error(err)
@@ -98,6 +103,15 @@ class PhyPro {
 			this.log.info('Config file for ' + pipeline + ' loaded successfully')
 			pipeInstance.keepGoing()
 		})
+	}
+
+	logInfo(msg) {
+		this.log.info(msg)
+	}
+
+
+	logWarn(msg) {
+		this.log.warn(msg)
 	}
 
 	checkStructureOfConfig_() {

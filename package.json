@@ -34,7 +34,7 @@
     "istanbul": "^0.4.5",
     "jsonfile": "^4.0.0",
     "mkdirp": "^0.5.1",
-    "pfql": "^1.0.3",
+    "pfql": "^1.2.0",
     "shelljs": "^0.7.8",
     "tnt.tree": "github:daviortega/tnt.tree#d3v4"
   },
