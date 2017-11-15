@@ -90,7 +90,7 @@ describe('pickGenomes', function() {
 			return pickGenomes.pick(taxid, N).then(function(taxids) {
 				pickGenomes.updatePhyProConfig(configFilename, taxids)
 				let configJSON = JSON.parse(fs.readFileSync(configFilename).toString())
-				expect(configJSON.header.backgroundGenomes.length).eql(3)
+				expect(configJSON.header.genomes.background.length).eql(3)
 			})
 		})
 		it('should add to existing taxids in the config file ', function() {
@@ -104,7 +104,7 @@ describe('pickGenomes', function() {
 				pickGenomes.updatePhyProConfig(configFilename, taxids)
 				pickGenomes.updatePhyProConfig(configFilename, taxids)
 				let configJSON = JSON.parse(fs.readFileSync(configFilename).toString())
-				expect(configJSON.header.backgroundGenomes.length).eql(N + N)
+				expect(configJSON.header.genomes.background.length).eql(N + N)
 			})
 		})
 		afterEach(function() {

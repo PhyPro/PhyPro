@@ -1,0 +1,52 @@
+digraph G {
+
+	start [
+		shape=box
+		style="rounded"
+	]
+	
+	subgraph cluster0 {
+		label = "Pre-computing"
+
+		init [
+			label = "--init"
+			shape = box
+		]
+
+		userInput [
+			label="user input\nconfiguration"
+			shape = parallelogram	
+		]
+
+		checkConfig [
+			label= "--check-config"
+			shape = box
+		]
+
+		fetchData [
+			label= "--fetch-data"
+			shape = box
+		]
+
+		init -> userInput
+		userInput -> checkConfig
+		checkConfig -> fetchData;
+	}
+
+	subgraph cluster1 {
+		label = "ref-tree"
+		fetchCCDs
+	}
+
+	subgraph cluster2 {
+		label = "phylo-profile"
+		trim
+	}
+
+	start -> init
+
+	fetchData -> fetchCCDs
+	fetchData -> trim
+	
+}
+

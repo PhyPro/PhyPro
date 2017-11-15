@@ -1,7 +1,7 @@
 # PhyPro - Advanced Phylogenetic Profile for Biologists
 
-[![Build Status](https://travis-ci.org/PhyPro/PhyPro.svg?branch=develop)](https://travis-ci.org/PhyPro/PhyPro)
-[![Coverage Status](https://coveralls.io/repos/github/PhyPro/PhyPro/badge.svg?branch=develop)](https://coveralls.io/github/PhyPro/PhyPro?branch=develop)
+[![Build Status](https://travis-ci.org/PhyPro/phypro.svg?branch=develop)](https://travis-ci.org/PhyPro/phypro)
+[![Coverage Status](https://coveralls.io/repos/github/PhyPro/phypro/badge.svg?branch=develop)](https://coveralls.io/github/PhyPro/phypro?branch=develop)
 
 This is the javascript implementation of PhyPro.
 
@@ -75,13 +75,17 @@ Conveniently, there is also the flag `--update-config` which will take the proje
 
 We may want to know more about systems from specific organisms. For that, we have the `referenceGenomes` field in the config file.
 
-There are two ways to fill that, one is to manually insert the taxonomy ids. The second way is to provide a `json` file with the information.
+There is no automated way to fill this section as they should be carefully curated. Ideally, we would keep a `json` file with the information about the genomes of interest and copy its contents to the config file.
+
+This is an example of how to organize the information about the genomes of interest.
 
 ```json
 [
     {
         "name": "Legionella pneumophila subsp. pneumophila str. Philadelphia 1",
-        "taxid": 272624
+        "taxid": 272624,
+        "pathogen": true,
+        "collaborator": "John Doe"
     },
     {
         "name": "Myxococcus xanthus DK 1622",
@@ -94,22 +98,40 @@ There are two ways to fill that, one is to manually insert the taxonomy ids. The
 ]
 ```
 
-As in the background genomes, PhyPro does not care of any of the fields but the `taxid`. Thus, it might be useful to keep notes about each of the reference genome and etc.
+As in the background genomes, PhyPro does not care of any of the fields but the `taxid` and `name`. Thus, it might be useful to keep notes about each of the reference genome and etc. 
 
-One way to easily keep this information is to place they reference genomes in a separate json file and copy and paste the contents in the `referenceGenomes` field in the config file.
+### Defining protein families
+
+There are many ways to search for a certain protein family computationally. PhyPro builds up on another tool called PFQL - Protein Feature Query Language to perform this task more robustly. PFQL is able to filter proteins that has a specific feature architecture. It is called "feature" because it is a generalization of domain architecture. So PhyPro expects us to defiine a protein family by explicitly writing PFQL rules that defines a protein family.
+
+These rules are writen in the config file under the key: `phyloProfile.PfqlDefinitions`
+
+Please read the documentation on PFQL [here](https://github.com/biowonks/pfql/blob/master/manual.md)
+
+### Defining CDDs
 
 
 ## Validate config file
 
-To avoid wasting time, before we start the pipelines, PhyPro will ask to validade the config file and inform of any mistaken we might have made:
+To avoid wasting time, before we start the pipelines, PhyPro will ask to validate the config file and inform of any mistaken we might have made:
 
 ```
-$ phypro --validate-config ProjectName
+$ phypro --check-config ProjectName
 ```
 
-It will try to be as informative as possible about any issue the config file might have.
+It will try to be as informative as possible about any issue the config file might have. However, there are two special sections that are more error prone and PhyPro naturally pays more attention to them:
 
-It will also check the list of genomes and make sure that there is no duplicates in both background and reference genomes. In case of duplicates, PhyPro will give preference to the genome in the reference genomes.
+
+### Validating backgroundGenomes and referenceGenomes
+
+First, PhyPro will parse the `*Genomes` and make sure that the information in these two sections of the config file are sound.
+
+First, since not all taxonomy IDs from the NCBI are in the MiST3 database, PhyPro will validate each taxid number against the database and let us know if there is any problem with that. Also, if we make a mistake in the field `name`, PhyPro will correct that and place the old value of this field under the key `nameByUser`. For this reason, we don't need to complete the field `name` ourselves as PhyPro will complete it for us during the validation process.
+
+### Validating PFQL rules
+
+PFQL rules will be validated by loading them up to a temporary PFQL instance. It will throw any problems with the rules that PFQL finds it. If you find a problem with the PFQL rule that was not cought, please contact the PFQL team in their [issue tracker](https://github.com/biowonks/pfql/issues).
+
 
 ## Keep going
 

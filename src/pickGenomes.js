@@ -25,13 +25,13 @@ exports.pick = (taxonomyID, N = 0) => {
 exports.updatePhyProConfig = (configFileName, taxids) => {
 	log.info('Updating config file: ' + configFileName)
 	let configJSON = JSON.parse(fs.readFileSync(configFileName).toString())
-	if (configJSON.header.backgroundGenomes.length === 0) {
-		configJSON.header.backgroundGenomes = taxids
+	if (configJSON.header.genomes.background.length === 0) {
+		configJSON.header.genomes.background = taxids
 	}
 	else {
 		log.warn('Found existing taxids, will add the new ones.')
 		taxids.forEach((taxid) => {
-			configJSON.header.backgroundGenomes.push(taxid)
+			configJSON.header.genomes.background.push(taxid)
 		})
 	}
 	fs.writeFileSync(configFileName, JSON.stringify(configJSON, null, ' '))

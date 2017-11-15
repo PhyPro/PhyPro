@@ -32,6 +32,14 @@ parser.addArgument(
 )
 
 parser.addArgument(
+	['--check-config'],
+	{
+		help: 'Validate and update existing config file.',
+		nargs: 0
+	}
+)
+
+parser.addArgument(
 	['--keep-going'],
 	{
 		help: 'Search for the config file of the project name passed. If found, it will execute the next step of the chosen pipeline',
@@ -48,7 +56,20 @@ let args = parser.parseArgs(),
 
 let phypro = new PhyPro(ProjectName)
 
-if (args.init)
+if (args.init) {
 	phypro.init()
-else
+}
+else if (args.check_config) {
+	phypro.loadConfigFile()
+	phypro.validateConfig()
+	phypro.updateConfig().then(() => {
+		const config = phypro.config()
+		phypro.logInfo('Config was updated with information and it seems good to go.')
+	})
+		.catch((err) => {
+			console.log(err)
+		})
+}
+else {
 	phypro.keepGoing(args.keep_going)
+}
