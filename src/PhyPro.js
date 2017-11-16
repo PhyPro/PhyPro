@@ -12,6 +12,8 @@ const pipelines = Object.keys(availablePipelines)
 
 const mist3 = require('./Mist3Helper.js')
 const ConfigUtils = require('./ConfigUtils.js')
+const FetchGenesFromGenome = require('./FetchGenesFromGenome.js')
+
 
 module.exports =
 class PhyPro {
@@ -90,6 +92,10 @@ class PhyPro {
 			console.log(err)
 			throw new Error(err)
 		})
+	}
+
+	fetchData() {
+		return null
 	}
 
 	keepGoing(pipelineChoices) {
