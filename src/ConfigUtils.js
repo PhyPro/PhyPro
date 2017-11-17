@@ -5,6 +5,8 @@ const bunyan = require('bunyan')
 const mist3 = require('./Mist3Helper.js')
 const pfql = require('pfql')
 
+const typesOfGenomes = ['reference', 'background']
+
 module.exports =
 class ConfigUtils {
 	constructor(config) {
@@ -24,7 +26,6 @@ class ConfigUtils {
 	}
 
 	fixDuplicates() {
-		const typesOfGenomes = ['reference', 'background']
 		typesOfGenomes.forEach((type) => {
 			this.popDuplicates_(type)
 		})
@@ -32,6 +33,17 @@ class ConfigUtils {
 
 	update() {
 		return this.updateTaxInfoMiST_('reference').then(() => this.updateTaxInfoMiST_('background'))
+	}
+
+	getTaxids() {
+		if (this.taxids_.length === 0) {
+			typesOfGenomes.forEach((type) => {
+				this.config_.header.genomes[type].forEach((genome) => {
+					this.taxids_.push(genome.taxid)
+				})
+			})
+		}
+		return this.taxids_
 	}
 
 	popDuplicates_(type) {

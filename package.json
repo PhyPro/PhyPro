@@ -36,13 +36,14 @@
     "mkdirp": "^0.5.1",
     "pfql": "^1.2.0",
     "shelljs": "^0.7.8",
+    "through2": "^2.0.3",
     "tnt.tree": "github:daviortega/tnt.tree#d3v4"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-fs": "^1.0.0",
     "coveralls": "^3.0.0",
-    "eslint": "^4.9.0",
+    "eslint": "^4.11.0",
     "mocha": "^4.0.1",
     "mocha-lcov-reporter": "^1.3.0",
     "mocha-pretty-bunyan-nyan": "^1.0.4",

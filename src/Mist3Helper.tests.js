@@ -30,11 +30,11 @@ describe('Mist3Helper', function() {
 	})
 	describe('getGenesByGenomes', function() {
 		it('should pass', function() {
-			this.timeout(10000)
+			this.timeout(14000)
+			const expectedNumberOfGenes = 736
 			const genome = 'GCF_000701865.1' // 'GCF_000006765.1'
 			return mist3.getGenesByGenome(genome).then((genes) => {
-				console.log(genes)
-				console.log(genes.length)
+				expect(genes.length).eql(expectedNumberOfGenes)
 			})
 		})
 		it('must fail is passed invalid version')

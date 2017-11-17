@@ -1,10 +1,12 @@
 'use strict'
 
-let fs = require('fs'),
-	path = require('path'),
-	bunyan = require('bunyan'),
-	mkdirp = require('mkdirp'),
-	jsonfile = require('jsonfile')
+const fs = require('fs')
+const path = require('path')
+const bunyan = require('bunyan')
+const mkdirp = require('mkdirp')
+const jsonfile = require('jsonfile')
+const zlib = require('zlib')
+
 
 const availablePipelines = require('../src/availablePipelines.json')
 
@@ -12,7 +14,7 @@ const pipelines = Object.keys(availablePipelines)
 
 const mist3 = require('./Mist3Helper.js')
 const ConfigUtils = require('./ConfigUtils.js')
-const FetchGenesFromGenome = require('./FetchGenesFromGenome.js')
+const fetchData = require('./fetchData')
 
 
 module.exports =
@@ -45,7 +47,7 @@ class PhyPro {
 	init(localPath = './') {
 		this.config_.header.history.initDate = Date()
 		this.log.info('Project ' + this.config_.header.ProjectName + ' initialized.')
-
+		mkdirp.sync(path.resolve(localPath, 'genomicInfo'))
 		pipelines.forEach((pipeline) => {
 			let PipeInstance = eval(availablePipelines[pipeline].start),
 				pipeInstance = new PipeInstance()
@@ -88,14 +90,15 @@ class PhyPro {
 				N += this.config_.header.genomes[type].length
 			})
 			this.log.info('There are ' + N + ' genomes in your config file')
-		}).catch((err) => {
-			console.log(err)
-			throw new Error(err)
 		})
+			.catch((err) => {
+				console.log(err)
+				throw new Error(err)
+			})
 	}
 
 	fetchData() {
-		return null
+		return this.storeGenes_()
 	}
 
 	keepGoing(pipelineChoices) {
@@ -120,6 +123,24 @@ class PhyPro {
 		this.log.warn(msg)
 	}
 
+	storeGenes_() {
+		const genomicInfoPath = './genomicInfo'
+		const configUtils = new ConfigUtils(this.config_)
+		const taxids = configUtils.getTaxids()
+		return new Promise((resolve, reject) => {
+			mist3.getGenomesByTaxids(taxids).then((genomes) => {
+				const promises = []
+				genomes.forEach((genome) => {
+					const version = genome.version
+					const filename = 'phypro.' + this.config_.header.ProjectName + '.genes.' + version + '.json.gz'
+					const filePath = path.resolve(genomicInfoPath, filename)
+					promises.push(fetchData.genesToZipFile(version, filePath))
+				})
+				Promise.all(promises).then(resolve)
+			})
+		})
+	}
+
 	checkStructureOfConfig_() {
 		if (!(this.config_.header))
 			throw new Error('No (or misplaced) mandatory header section')
@@ -137,6 +158,8 @@ class PhyPro {
 	isValidProjectStructure_() {
 		if (!(fs.existsSync('phypro.' + this.config_.header.ProjectName + '.config.json')))
 			throw new Error('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
+		if (!(fs.existsSync('genomicInfo')))
+			throw new Error('The current directory does not have the genomicInfo folder. Please check if this is the correct directory.')
 		pipelines.forEach((pipeline) => {
 			if (!(fs.existsSync(pipeline)))
 				throw new Error('The current directory does not have the ' + pipeline + ' folder. Please check if this is the correct directory.')

@@ -17,16 +17,13 @@ class FetchGenomes extends stream.Readable {
 
 	_read(size) {
 		const getGenes = (v, p) => {
-			return new Promise((resolve, reject) => {
-				this.log.info('Initiating stream')
-				mist3.getGenesByGenomePerPage(v, p)
-					.then((newGenes) => {
-						if (newGenes.length !== 0)
-							this.push(newGenes)
-						else
-							this.push(null)
-					})
-			})
+			return mist3.getGenesByGenomePerPage(v, p)
+				.then((newGenes) => {
+					if (newGenes.length !== 0)
+						this.push(newGenes)
+					else
+						this.push(null)
+				})
 		}
 		getGenes(this.genome, this.page)
 		this.page++

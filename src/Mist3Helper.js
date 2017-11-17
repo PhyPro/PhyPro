@@ -76,7 +76,6 @@ exports.getGenesByGenome = (version) => {
 		return new Promise((resolve, rejectg) => {
 			exports.getGenesByGenomePerPage(v, p)
 				.then((newGenes) => {
-					console.log('dsaas')
 					if (newGenes.length !== 0) {
 						newGenes.forEach((gene) => {
 							allGenes.push(gene)
@@ -96,7 +95,8 @@ exports.getGenesByGenome = (version) => {
 
 exports.getGenesByGenomePerPage = (version, page = 1) => {
 	const genes = []
-	httpOptions.path = '/v1/genomes/' + version + '/genes?page=' + page
+	const genesPerPage = 100
+	httpOptions.path = '/v1/genomes/' + version + '/genes?per_page=' + genesPerPage + '&page=' + page
 	return new Promise((resolve, reject) => {
 		log.info('Fetching genes from MiST3 : ' + version + ' page ' + page)
 		const req = http.request(httpOptions, function(res) {

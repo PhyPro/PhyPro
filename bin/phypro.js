@@ -83,6 +83,7 @@ else if (args.fetch_data) {
 		phypro.logInfo('Data is in place, proceed with the pipeline of choice.')
 	})
 }
+
 else {
 	phypro.keepGoing(args.keep_going)
 }
