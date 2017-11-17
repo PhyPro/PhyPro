@@ -40,6 +40,14 @@ parser.addArgument(
 )
 
 parser.addArgument(
+	['--fetch-data'],
+	{
+		help: 'Fetch data relevant to both pipelines.',
+		nargs: 0
+	}
+)
+
+parser.addArgument(
 	['--keep-going'],
 	{
 		help: 'Search for the config file of the project name passed. If found, it will execute the next step of the chosen pipeline',
@@ -63,13 +71,19 @@ else if (args.check_config) {
 	phypro.loadConfigFile()
 	phypro.validateConfig()
 	phypro.updateConfig().then(() => {
-		const config = phypro.config()
 		phypro.logInfo('Config was updated with information and it seems good to go.')
 	})
 		.catch((err) => {
 			console.log(err)
 		})
 }
+else if (args.fetch_data) {
+	phypro.loadConfigFile()
+	phypro.fetchData().then(() => {
+		phypro.logInfo('Data is in place, proceed with the pipeline of choice.')
+	})
+}
+
 else {
 	phypro.keepGoing(args.keep_going)
 }

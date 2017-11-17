@@ -199,5 +199,30 @@ describe('PhyPro', function() {
 			})
 		})
 	})
+	describe('storeGenes_', function() {
+		it('should work', function(done) {
+			this.timeout(35000)
+			process.chdir(testPath)
+			const projectName = 'template'
+			const phypro = new PhyPro(projectName)
+			const configFile = 'validateOk.phypro.template.config.json'
+			phypro.init()
+			phypro.loadConfigFile(configFile)
+			phypro.storeGenes_().then(function() {
+				done()
+			})
+		})
+		after(function() {
+			pipelines.forEach((pipeline) => {
+				rimraf.sync(path.resolve(testPath, pipeline))
+			})
+			rimraf.sync(path.resolve(testPath, 'genomicInfo'))
+			let configFilenamePattern = path.resolve(testPath, 'phypro.*.config.json')
+			let files = glob.glob.sync(configFilenamePattern)
+			files.forEach(function(file) {
+				fs.unlinkSync(file)
+			})
+		})
+	})
 })
 

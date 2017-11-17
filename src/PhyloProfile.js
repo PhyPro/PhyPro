@@ -16,7 +16,7 @@ module.exports =
 class PhyloProfile extends Pipeline {
 	constructor() {
 		super({objectMode: true})
-		this.config.PFQLDefinitions = []
+		this.config.PfqlDefinitions = []
 		this.config.trimRules = {}
 	}
 
