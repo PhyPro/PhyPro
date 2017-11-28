@@ -6,14 +6,16 @@ const through2 = require('through2')
 const zlib = require('zlib')
 
 const FetchGenesStream = require('./FetchGenesFromGenomeStream')
+const addAseqInfo = require('./addAseqInfoStream.js')
 
-exports.genesToZipFile = (genome, filename) => {
+exports.proteinsToZipFile = (genome, filename) => {
 	const gzip = zlib.createGzip()
 	const fetchGenes = new FetchGenesStream(genome)
 	const fileWriteStream = fs.createWriteStream(filename)
 	let page = 1
 	return new Promise((resolve, reject) => {
 		fetchGenes
+			.pipe(addAseqInfo.stream())
 			.pipe(through2.obj(function(chunk, enc, next) {
 				let data = JSON.stringify(chunk)
 				data = data.slice(0, data.length - 1)
@@ -29,5 +31,8 @@ exports.genesToZipFile = (genome, filename) => {
 			.pipe(gzip)
 			.pipe(fileWriteStream)
 			.on('finish', resolve)
+			.on('error', (err) => {
+				console.log(err)
+			})
 	})
 }

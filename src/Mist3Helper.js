@@ -133,3 +133,18 @@ exports.getGenomesByTaxids = (taxids = []) => {
 		req.end()
 	})
 }
+
+exports.getSequenceFromAseqs = (aseqs = []) => {
+	httpOptions.method = 'POST'
+	httpOptions.path = '/v1/aseqs'
+	const content = 'eALFsiVPvD8jtNe_9Qifig\nY-Vq_1fWWNkEnvpwVCRotw'
+	log.info('Fetching sequence information from MiST3')
+	const req = http.request(httpOptions, (res) => {
+		console.log(res.statusCode)
+		console.log(res.statusMessage)
+		res.on('data', console.log)
+		res.on('error', console.log)
+	})
+	req.write(content)
+	req.end()
+}

@@ -7,7 +7,7 @@ const mist3 = require('./Mist3Helper.js')
 
 
 module.exports =
-class FetchGenomes extends stream.Readable {
+class FetchGenesFromGenomesStream extends stream.Readable {
 	constructor(genome, options = {objectMode: true}) {
 		super(options)
 		this.genome = genome

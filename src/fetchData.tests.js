@@ -10,14 +10,14 @@ const testPath = path.resolve(__dirname, 'test-data')
 const fetchData = require('./fetchData')
 
 describe('fetchData', function() {
-	describe('genesToZipFile', function() {
-		it('should work', function() {
+	describe('proteinsToZipFile', function() {
+		it('should work', function(done) {
 			this.timeout(10000)
-			const expectedNumberOfGenes = 736
+			const expectedNumberOfGenes = 655
 			const genome = 'GCF_000701865.1'
 			const filename = 'phypro.template.genes.' + genome + '.json.gz'
 			const filePath = path.resolve(testPath, filename)
-			return fetchData.genesToZipFile(genome, filePath).then(() => {
+			fetchData.proteinsToZipFile(genome, filePath).then(() => {
 				let data = ''
 				fs.createReadStream(filePath).pipe(zlib.createGunzip())
 					.on('data', function(d) {
@@ -26,6 +26,7 @@ describe('fetchData', function() {
 					.on('end', () => {
 						const recordedData = JSON.parse(data)
 						expect(recordedData.length).eql(expectedNumberOfGenes)
+						done()
 					})
 			})
 		})

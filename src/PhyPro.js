@@ -134,11 +134,15 @@ class PhyPro {
 					const version = genome.version
 					const filename = 'phypro.' + this.config_.header.ProjectName + '.genes.' + version + '.json.gz'
 					const filePath = path.resolve(genomicInfoPath, filename)
-					promises.push(fetchData.genesToZipFile(version, filePath))
+					promises.push(fetchData.proteinsToZipFile(version, filePath))
 				})
 				Promise.all(promises).then(resolve)
 			})
 		})
+	}
+
+	makeFasta_() {
+		return null
 	}
 
 	checkStructureOfConfig_() {
