@@ -132,10 +132,14 @@ First, since not all taxonomy IDs from the NCBI are in the MiST3 database, PhyPr
 
 PFQL rules will be validated by loading them up to a temporary PFQL instance. It will throw any problems with the rules that PFQL finds it. If you find a problem with the PFQL rule that was not cought, please contact the PFQL team in their [issue tracker](https://github.com/biowonks/pfql/issues).
 
+### Fetching and parsing the relevant data
+After we configure the config file, we are pretty much set. The next step is to tell PhyPro to get the relevant data and parse it in different files that makes sense. PhyPro uses the concept of `streams`. That means that as the data start to pour from the MiST3 database servers, PhyPro immediately start to parse the data in several fronts:
+
+* the raw combined output from MiST3 and SeqDepot is compacted and stored in `.json.gz` files
+* whole genome fasta files are produced and stored in `.fa` files
+* Using PFQL, PhyPro will will make fasta files related to each protein family described in the config file.
 
 ## Keep going
-
-After we configure the config file, we are pretty much set. The next step is to tell PhyPro what we want it to do.
 
 we can do that by the use of the flag --keep-going. This flag must have at least one argument, which is the name of the pipeline we wish PhyPro to run. Notice that as of the version of this manual, the standard release of PhyPro has two pipelines: `phyloProfile` and `refTree`. we can pass either or both.
 
