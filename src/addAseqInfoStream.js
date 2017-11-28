@@ -3,46 +3,64 @@
 const bunyan = require('bunyan')
 const through2 = require('through2')
 const sd = require('./SeqdepotHelper.js')
+const Transform = require('stream').Transform
 
 const seqdepotDefaults = {
 	maxAseqsPerQuery: 1000
 }
 
-exports.stream = () => {
-	let aseqs = []
-	let entries = []
-	return through2.obj((chunk, enc, next) => {
+module.exports =
+class AddAseqInfoStream extends Transform {
+	constructor() {
+		super({objectMode: true})
+		this.aseqs = []
+		this.entries = []
+		this.log = bunyan.createLogger({
+			name: 'AddAseqInfoStream'
+		})
+	}
+
+	_transform(chunk, enc, next) {
 		chunk.forEach((item) => {
 			if (item.aseq_id) {
-				aseqs.push(item.aseq_id)
-				entries.push(item)
+				this.aseqs.push(item.aseq_id)
+				this.entries.push(item)
 			}
 		})
-		if (entries.length === seqdepotDefaults.maxAseqsPerQuery) {
-			sd.getInfoFromAseqs(aseqs).then((items) => {
+		const self = this
+		this.log.info('Aseqs collected: ' + this.aseqs.length)
+		if (this.entries.length >= seqdepotDefaults.maxAseqsPerQuery) {
+			this.log.info('Asking SeqDepot for info')
+			const aseqsToGo = this.aseqs.splice(0, seqdepotDefaults.maxAseqsPerQuery)
+			const entriesToGo = this.entries.splice(0, seqdepotDefaults.maxAseqsPerQuery)
+			sd.getInfoFromAseqs(aseqsToGo).then(function(items) {
 				items.forEach((item, i) => {
-					if (item.id !== entries[i].aseq_id)
+					if (item.id !== entriesToGo[i].aseq_id)
 						throw new Error('Ooopsy, something is wrong. SeqDepot does not honor order')
-					entries[i].sd = item
+					entriesToGo[i].sd = item
 				})
-				this.push(entries)
-				entries = []
-				aseqs = []
+				self.push(entriesToGo)
 				next()
+			}).catch((err) => {
+				console.log(err)
+				process.abort()
 			})
 		}
-		next()
-	}, function(flush) {
-		if (aseqs.length !== 0) {
-			sd.getInfoFromAseqs(aseqs).then((items) => {
-				items.forEach((item, i) => {
-					if (item.id !== entries[i].aseq_id)
-						throw new Error('Ooopsy, something is wrong. SeqDepot does not honor order')
-					entries[i].sd = item
-				})
-				this.push(entries)
-				flush()
-			})
+		else {
+			next()
 		}
-	})
+	}
+
+	_flush(done) {
+		this.log.info('Asking SeqDepot for info one last time')
+		sd.getInfoFromAseqs(this.aseqs).then((items) => {
+			items.forEach((item, i) => {
+				if (item.id !== this.entries[i].aseq_id)
+					throw new Error('Ooopsy, something is wrong. SeqDepot does not honor order')
+				this.entries[i].sd = item
+			})
+			this.push(this.entries)
+			done()
+		})
+	}
 }
