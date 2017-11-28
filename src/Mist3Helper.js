@@ -93,6 +93,25 @@ exports.getGenesByGenome = (version) => {
 }
 
 
+exports.getGenomeInfoByVersion = (version) => {
+	httpOptions.path = '/v1/genomes/' + version
+	return new Promise((resolve, reject) => {
+		log.info('Fetching info from genome: ' + version )
+		const req = http.request(httpOptions, function(res) {
+			const chunks = []
+			res.on('data', function(chunk) {
+				chunks.push(chunk)
+			})
+			res.on('end', function() {
+				log.info('Information from genome ' + version + ' was received.')
+				const info = JSON.parse(Buffer.concat(chunks))
+				resolve(info)
+			})
+		})
+		req.end()
+	})
+}
+
 exports.getGenesByGenomePerPage = (version, page = 1) => {
 	const genes = []
 	const genesPerPage = 100
@@ -105,7 +124,7 @@ exports.getGenesByGenomePerPage = (version, page = 1) => {
 				chunks.push(chunk)
 			})
 			res.on('end', function() {
-				log.info('Information received')
+				log.info('Information from genome ' + version + ' was received.')
 				const newGenes = JSON.parse(Buffer.concat(chunks))
 				resolve(newGenes)
 			})

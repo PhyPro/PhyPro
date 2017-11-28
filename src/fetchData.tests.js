@@ -8,55 +8,53 @@ const zlib = require('zlib')
 const testPath = path.resolve(__dirname, 'test-data')
 
 const fetchData = require('./fetchData')
+const mist3 = require('./Mist3Helper')
 
 describe('fetchData', function() {
 	describe('proteinsToZipFile', function() {
-		it('should work', function(done) {
-			this.timeout(10000)
-			const expectedNumberOfGenes = 655
-			const genome = 'GCF_000701865.1'
-			const filename = 'phypro.template.genes.' + genome + '.json.gz'
-			const filePath = path.resolve(testPath, filename)
-			fetchData.proteinsToZipFile(genome, filePath).then(() => {
-				let data = ''
-				fs.createReadStream(filePath).pipe(zlib.createGunzip())
-					.on('data', function(d) {
-						data += d.toString()
-					})
-					.on('end', () => {
-						const recordedData = JSON.parse(data)
-						expect(recordedData.length).eql(expectedNumberOfGenes)
-						done()
-					})
-			})
-		})
-		it.only('should work with large genomes', function(done) {
+		it('should work and make a fasta file and a json file with info', function(done) {
 			this.timeout(100000)
-			const expectedNumberOfGenes = 4047
-			const genome = 'GCF_000263355.1'
+			const expectedNumberOfGenes = 5572
+			const genome = 'GCF_000006765.1'
 			const filename = 'phypro.template.genes.' + genome + '.json.gz'
+			const fastaFile = genome + '.fa'
 			const filePath = path.resolve(testPath, filename)
-			fetchData.proteinsToZipFile(genome, filePath).then(() => {
-				let data = ''
-				fs.createReadStream(filePath).pipe(zlib.createGunzip())
-					.on('data', function(d) {
-						data += d.toString()
-					})
-					.on('end', () => {
-						const recordedData = JSON.parse(data)
-						expect(recordedData.length).eql(expectedNumberOfGenes)
-						done()
-					})
-			}).catch((err) => {
-				console.log(err)
+			const fastaPath = path.resolve(testPath, fastaFile)
+			mist3.getGenomeInfoByVersion(genome).then((genomeInfo) => {
+				fetchData.proteinsToZipFile(genomeInfo, filePath, fastaPath).then(() => {
+					let data = ''
+					fs.createReadStream(filePath).pipe(zlib.createGunzip())
+						.on('data', function(d) {
+							data += d.toString()
+						})
+						.on('end', () => {
+							const recordedData = JSON.parse(data)
+							expect(recordedData.length).eql(expectedNumberOfGenes)
+							return
+						})
+				}).then(() => {
+					let data = ''
+					let biggerThanCount = 0
+					fs.createReadStream(fastaPath)
+						.on('data', function(d) {
+							data = d.toString()
+							biggerThanCount += (data.match(/>/g) || []).length
+						})
+						.on('end', () => {
+							expect(biggerThanCount).eql(expectedNumberOfGenes)
+							done()
+						})
+				})
 			})
 		})
 	})
 	after(function() {
-		const genomes = ['GCF_000701865.1', 'GCF_000263355.1']
-		genomes.forEach((genome) => {
-			const filename = 'phypro.template.genes.' + genome + '.json.gz'
-			const filePath = path.resolve(testPath, filename)
+		const genome = 'GCF_000006765.1'
+		const filename = 'phypro.template.genes.' + genome + '.json.gz'
+		const fastaFile = genome + '.fa'
+		const files = [filename, fastaFile]
+		files.forEach((file) => {
+			const filePath = path.resolve(testPath, file)
 			try {
 				fs.unlinkSync(filePath)
 			}

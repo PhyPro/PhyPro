@@ -4,7 +4,6 @@ const bunyan = require('bunyan')
 const Transform = require('stream').Transform
 const seqdepot = require('./SeqdepotHelper.js')
 
-
 const seqdepotDefaults = {
 	maxAseqsPerQuery: 1000
 }
@@ -23,43 +22,44 @@ class MakeFasta extends Transform {
 		this.sequence_ = ''
 		this.entries_ = []
 		this.aseqs_ = []
+		this.log = bunyan.createLogger({
+			name: 'MakeFasta'
+		})
 	}
 
 	_transform(chunk, enc, next) {
-		this.entries_.push({
-			tag: this.generateTag_(chunk),
-			aseq: chunk.aseq_id
+		let numEntries = 0
+		chunk.forEach((item) => {
+			if (item.sd.s) {
+				const tag = this.generateTag_(item)
+				const sequence = item.sd.s
+				const entry = this.makeFastaEntry_(tag, sequence)
+				this.push(entry)
+				numEntries++
+			}
+			else {
+				this.log.warn('No information on SeqDepot for: ' + item.sd.id)
+			}
 		})
-		this.aseqs_.push(chunk.aseq_id)
-
-		if (this.entries_.length === seqdepotDefaults.maxAseqsPerQuery) {
-			seqdepot.getInfoFromAseqs(aseqs).then((items) => {
-				items.forEach((item, i) => {
-					if (item.id !== this.entries_[i].aseq)
-						throw new Error('Ooopsy, something is wrong. SeqDepot does not honor order')
-					const entry = this.makeFastaEntry_(this.entries_[i].tag, item.s)
-				})
-			})
-		}
+		this.log.info('Pushing ' + numEntries + ' fasta entries')
 		next()
 	}
 
 	makeFastaEntry_(header, sequence) {
-		return '>' + header + '\n' + sequence
+		return '>' + header + '\n' + sequence + '\n'
 	}
 
 	generateTag_(geneInfo) {
 		const genus = this.info_.genus
-		const species = this.info_species.split(' ')[1]
+		const species = this.info_.species.split(' ')[1]
 		const id = this.info_.taxonomy_id
 
-		const orgID = genus.substring(0, 2) +
-			fastaTagDefaults.orgIdSeparator + 
-			species.substring(0, 3) + 
-			fastaTagDefaults.orgIdSeparator +
-			id
-		
+		let orgID = genus.substring(0, 2)
+		orgID += fastaTagDefaults.orgIdSeparator
+		orgID += species.substring(0, 3)
+		orgID += fastaTagDefaults.orgIdSeparator
+		orgID += id
+
 		return orgID + fastaTagDefaults.featureSeparator + geneInfo.stable_id
 	}	
-
 }

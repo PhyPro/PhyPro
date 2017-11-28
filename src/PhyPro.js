@@ -133,8 +133,10 @@ class PhyPro {
 				genomes.forEach((genome) => {
 					const version = genome.version
 					const filename = 'phypro.' + this.config_.header.ProjectName + '.genes.' + version + '.json.gz'
+					const fasta = version + '.fa'
 					const filePath = path.resolve(genomicInfoPath, filename)
-					promises.push(fetchData.proteinsToZipFile(version, filePath))
+					const fastaPath = path.resolve(genomicInfoPath, fasta)
+					promises.push(fetchData.proteinsToZipFile(genome, filePath, fastaPath))
 				})
 				Promise.all(promises).then(resolve)
 			})
