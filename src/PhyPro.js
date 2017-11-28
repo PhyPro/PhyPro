@@ -98,7 +98,7 @@ class PhyPro {
 	}
 
 	fetchData() {
-		return this.storeGenes_()
+		return this.storeInfo_()
 	}
 
 	keepGoing(pipelineChoices) {
@@ -123,7 +123,7 @@ class PhyPro {
 		this.log.warn(msg)
 	}
 
-	storeGenes_() {
+	storeInfo_() {
 		const genomicInfoPath = './genomicInfo'
 		const configUtils = new ConfigUtils(this.config_)
 		const taxids = configUtils.getTaxids()
@@ -133,8 +133,10 @@ class PhyPro {
 				genomes.forEach((genome) => {
 					const version = genome.version
 					const filename = 'phypro.' + this.config_.header.ProjectName + '.genes.' + version + '.json.gz'
+					const fasta = version + '.fa'
 					const filePath = path.resolve(genomicInfoPath, filename)
-					promises.push(fetchData.genesToZipFile(version, filePath))
+					const fastaPath = path.resolve(genomicInfoPath, fasta)
+					promises.push(fetchData.proteinInfoToFiles(genome, filePath, fastaPath))
 				})
 				Promise.all(promises).then(resolve)
 			})

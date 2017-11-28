@@ -199,7 +199,7 @@ describe('PhyPro', function() {
 			})
 		})
 	})
-	describe('storeGenes_', function() {
+	describe('storeInfo_', function() {
 		it('should work', function(done) {
 			this.timeout(35000)
 			process.chdir(testPath)
@@ -208,7 +208,7 @@ describe('PhyPro', function() {
 			const configFile = 'validateOk.phypro.template.config.json'
 			phypro.init()
 			phypro.loadConfigFile(configFile)
-			phypro.storeGenes_().then(function() {
+			phypro.storeInfo_().then(function() {
 				done()
 			})
 		})
