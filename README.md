@@ -132,12 +132,28 @@ First, since not all taxonomy IDs from the NCBI are in the MiST3 database, PhyPr
 
 PFQL rules will be validated by loading them up to a temporary PFQL instance. It will throw any problems with the rules that PFQL finds it. If you find a problem with the PFQL rule that was not cought, please contact the PFQL team in their [issue tracker](https://github.com/biowonks/pfql/issues).
 
-### Fetching and parsing the relevant data
-After we configure the config file, we are pretty much set. The next step is to tell PhyPro to get the relevant data and parse it in different files that makes sense. PhyPro uses the concept of `streams`. That means that as the data start to pour from the MiST3 database servers, PhyPro immediately start to parse the data in several fronts:
+### Fetching, parsing and storing relevant protein information.
+After we configure the config file, we are pretty much set. The next step is to tell PhyPro to get the relevant data and parse it in different files that makes sense.
+
+We can run it by this simple command:
+```
+$ phypro ProjectName --fetch-data
+```
+
+ PhyPro uses the concept of `streams`. That means that as the data start to pour from the MiST3 database servers, PhyPro immediately start to parse the data in two fronts:
 
 * the raw combined output from MiST3 and SeqDepot is compacted and stored in `.json.gz` files
 * whole genome fasta files are produced and stored in `.fa` files
-* Using PFQL, PhyPro will will make fasta files related to each protein family described in the config file.
+
+> Note about the fasta files: PhyPro uses the following tag system: `Xx_yyy|genome_version-locus`. The `Xx` is the first two letters of the genus and `yyy` the first three characters of the species name. The pipe symbol `|` is used to divide this "human readable" hint of from which organism this is from and the what MiST3 calls `stable id`. This id is the new accession number of the genome version in the NCBI database following by the new locus tag.
+
+Next, PhyPro automatically will stream all `.json` files through a pipeline that uses the PFQL rules to build fasta files with members of each protein family.
+
+In summary the `--fetch-data` step is:
+
+1) get data from MiST3 and SeqDepot database
+2) store raw data in `.json.gz` format and sequence data in fasta file format.
+3) builds fasta files with sequences for each protein family described in the config file.
 
 ## Keep going
 

@@ -9,6 +9,8 @@ const seqdepotDefaults = {
 }
 
 const fastaTagDefaults = {
+	numOfLettersForGenus: 2,
+	numOfLettersForSpecies: 3,
 	orgIdSeparator: '_',
 	featureSeparator: '|'
 }
@@ -52,14 +54,11 @@ class MakeFasta extends Transform {
 	generateTag_(geneInfo) {
 		const genus = this.info_.genus
 		const species = this.info_.species.split(' ')[1]
-		const id = this.info_.taxonomy_id
 
-		let orgID = genus.substring(0, 2)
+		let orgID = genus.substring(0, fastaTagDefaults.numOfLettersForGenus)
 		orgID += fastaTagDefaults.orgIdSeparator
-		orgID += species.substring(0, 3)
-		orgID += fastaTagDefaults.orgIdSeparator
-		orgID += id
+		orgID += species.substring(0, fastaTagDefaults.numOfLettersForSpecies)
 
 		return orgID + fastaTagDefaults.featureSeparator + geneInfo.stable_id
-	}	
+	}
 }
