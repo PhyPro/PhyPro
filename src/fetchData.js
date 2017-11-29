@@ -9,7 +9,7 @@ const FetchGenesStream = require('./FetchGenesFromGenomeStream')
 const AddAseqInfoStream = require('./addAseqInfoStream.js')
 const MakeFasta = require('./MakeFasta.js')
 
-exports.proteinsToZipFile = (genome, filename, fastafilename) => {
+exports.proteinInfoToFiles = (genome, filename, fastafilename) => {
 	const gzip = zlib.createGzip()
 	const fetchGenes = new FetchGenesStream(genome.version)
 	const addAseqInfoStream = new AddAseqInfoStream()

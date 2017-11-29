@@ -11,7 +11,7 @@ const fetchData = require('./fetchData')
 const mist3 = require('./Mist3Helper')
 
 describe('fetchData', function() {
-	describe('proteinsToZipFile', function() {
+	describe('proteinInfoToFiles', function() {
 		it('should work and make a fasta file and a json file with info', function(done) {
 			this.timeout(100000)
 			const expectedNumberOfGenes = 5572
@@ -21,7 +21,7 @@ describe('fetchData', function() {
 			const filePath = path.resolve(testPath, filename)
 			const fastaPath = path.resolve(testPath, fastaFile)
 			mist3.getGenomeInfoByVersion(genome).then((genomeInfo) => {
-				fetchData.proteinsToZipFile(genomeInfo, filePath, fastaPath).then(() => {
+				fetchData.proteinInfoToFiles(genomeInfo, filePath, fastaPath).then(() => {
 					let data = ''
 					fs.createReadStream(filePath).pipe(zlib.createGunzip())
 						.on('data', function(d) {
