@@ -32,15 +32,15 @@ class MakeFasta extends Transform {
 	_transform(chunk, enc, next) {
 		let numEntries = 0
 		chunk.forEach((item) => {
-			if (item.sd.s) {
+			if (item.ai.sequence) {
 				const tag = this.generateTag_(item)
-				const sequence = item.sd.s
+				const sequence = item.ai.sequence
 				const entry = this.makeFastaEntry_(tag, sequence)
 				this.push(entry)
 				numEntries++
 			}
 			else {
-				this.log.warn('No information on SeqDepot for: ' + item.sd.id)
+				this.log.warn('No information on MiST3 for: ' + item.ai.id)
 			}
 		})
 		this.log.info('Pushing ' + numEntries + ' fasta entries')

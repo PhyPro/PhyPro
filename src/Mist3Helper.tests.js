@@ -39,4 +39,18 @@ describe('Mist3Helper', function() {
 		})
 		it('must fail is passed invalid version')
 	})
+	describe('getInfoFromAseqs', function() {
+		it('get sequences if all is good', function() {
+			const aseqs = ['eALFsiVPvD8jtNe_9Qifig', 'Y-Vq_1fWWNkEnvpwVCRotw']
+			mist3.getInfoFromAseqs(aseqs).then((results) => {
+				expect(results.length).eql(aseqs.length)
+			})
+		})
+		it('should fail if bad format', function() {
+			const aseqs = ['netneutrality']
+			return mist3.getInfoFromAseqs(aseqs).catch((err) => {
+				expect(err.statusCode).eql(400)
+			})
+		})
+	})
 })

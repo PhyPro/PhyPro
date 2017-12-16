@@ -2,10 +2,10 @@
 
 const bunyan = require('bunyan')
 const through2 = require('through2')
-const sd = require('./SeqdepotHelper.js')
+const mist3 = require('./Mist3Helper.js')
 const Transform = require('stream').Transform
 
-const seqdepotDefaults = {
+const mist3Defaults = {
 	maxAseqsPerQuery: 1000
 }
 
@@ -29,22 +29,27 @@ class AddAseqInfoStream extends Transform {
 		})
 		const self = this
 		this.log.info('Aseqs collected: ' + this.aseqs.length)
-		if (this.entries.length >= seqdepotDefaults.maxAseqsPerQuery) {
-			this.log.info('Asking SeqDepot for info')
-			const aseqsToGo = this.aseqs.splice(0, seqdepotDefaults.maxAseqsPerQuery)
-			const entriesToGo = this.entries.splice(0, seqdepotDefaults.maxAseqsPerQuery)
-			sd.getInfoFromAseqs(aseqsToGo).then(function(items) {
-				items.forEach((item, i) => {
-					if (item.id !== entriesToGo[i].aseq_id)
-						throw new Error('Ooopsy, something is wrong. SeqDepot does not honor order')
-					entriesToGo[i].sd = item
+		if (this.entries.length >= mist3Defaults.maxAseqsPerQuery) {
+			this.log.info('Asking MiST3 for info')
+			const aseqsToGo = this.aseqs.splice(0, mist3Defaults.maxAseqsPerQuery)
+			const entriesToGo = this.entries.splice(0, mist3Defaults.maxAseqsPerQuery)
+			const enhancedEntries = []
+			mist3.getInfoFromAseqs(aseqsToGo)
+				.then((aseqInfos) => {
+					entriesToGo.forEach((entry) => {
+						const aseqInfo = aseqInfos.filter((info) => {
+							return info.id === entry.aseq_id
+						})
+						entry.ai = aseqInfo[0]
+						enhancedEntries.push(entry)
+					})
+					self.push(enhancedEntries)
+					next()
 				})
-				self.push(entriesToGo)
-				next()
-			}).catch((err) => {
-				console.log(err)
-				process.abort()
-			})
+				.catch((err) => {
+					console.log(err)
+					process.abort()
+				})
 		}
 		else {
 			next()
@@ -52,15 +57,22 @@ class AddAseqInfoStream extends Transform {
 	}
 
 	_flush(done) {
-		this.log.info('Asking SeqDepot for info one last time')
-		sd.getInfoFromAseqs(this.aseqs).then((items) => {
-			items.forEach((item, i) => {
-				if (item.id !== this.entries[i].aseq_id)
-					throw new Error('Ooopsy, something is wrong. SeqDepot does not honor order')
-				this.entries[i].sd = item
+		this.log.info('Asking MiST3 for info one last time')
+		const enhancedEntries = []
+		mist3.getInfoFromAseqs(this.aseqs)
+			.then((aseqInfos) => {
+				this.entries.forEach((entry) => {
+					const aseqInfo = aseqInfos.filter((info) => {
+						return info.id === entry.aseq_id
+					})
+					entry.ai = aseqInfo[0]
+					enhancedEntries.push(entry)
+				})
+				this.push(enhancedEntries)
+				done()
 			})
-			this.push(this.entries)
-			done()
-		})
+			.catch((err) => {
+				console.log(err)
+			})
 	}
 }
