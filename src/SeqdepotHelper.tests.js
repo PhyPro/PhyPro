@@ -7,7 +7,7 @@ chai.use(chaiAsPromised)
 const expect = chai.expect
 const should = chai.should
 
-const seqdepot = require('./SeqdepotHelper.js')
+const seqdepot = require('./SeqdepotHelper')
 
 describe('SeqdepotHelper', function() {
 	describe('getInfoFromAseqs', function() {

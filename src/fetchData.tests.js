@@ -21,30 +21,32 @@ describe('fetchData', function() {
 			const filePath = path.resolve(testPath, filename)
 			const fastaPath = path.resolve(testPath, fastaFile)
 			mist3.getGenomeInfoByVersion(genome).then((genomeInfo) => {
-				fetchData.proteinInfoToFiles(genomeInfo, filePath, fastaPath).then(() => {
-					let data = ''
-					fs.createReadStream(filePath).pipe(zlib.createGunzip())
-						.on('data', function(d) {
-							data += d.toString()
-						})
-						.on('end', () => {
-							const recordedData = JSON.parse(data)
-							expect(recordedData.length).eql(expectedNumberOfGenes)
-							return
-						})
-				}).then(() => {
-					let data = ''
-					let biggerThanCount = 0
-					fs.createReadStream(fastaPath)
-						.on('data', function(d) {
-							data = d.toString()
-							biggerThanCount += (data.match(/>/g) || []).length
-						})
-						.on('end', () => {
-							expect(biggerThanCount).eql(expectedNumberOfGenes)
-							done()
-						})
-				})
+				fetchData.proteinInfoToFiles(genomeInfo, filePath, fastaPath)
+					.then(() => {
+						let data = ''
+						fs.createReadStream(filePath).pipe(zlib.createGunzip())
+							.on('data', function(d) {
+								data += d.toString()
+							})
+							.on('end', () => {
+								const recordedData = JSON.parse(data)
+								expect(recordedData.length).eql(expectedNumberOfGenes)
+								return
+							})
+					})
+					.then(() => {
+						let data = ''
+						let biggerThanCount = 0
+						fs.createReadStream(fastaPath)
+							.on('data', function(d) {
+								data = d.toString()
+								biggerThanCount += (data.match(/>/g) || []).length
+							})
+							.on('end', () => {
+								expect(biggerThanCount).eql(expectedNumberOfGenes)
+								done()
+							})
+					})
 			})
 		})
 	})

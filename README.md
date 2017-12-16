@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/PhyPro/phypro.svg?branch=develop)](https://travis-ci.org/PhyPro/phypro)
 [![Coverage Status](https://coveralls.io/repos/github/PhyPro/phypro/badge.svg?branch=develop)](https://coveralls.io/github/PhyPro/phypro?branch=develop)
+[![License](https://img.shields.io/badge/license-CC0--1.0-blue.svg)](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
+
 
 This is the javascript implementation of PhyPro.
 
@@ -147,6 +149,9 @@ $ phypro ProjectName --fetch-data
 
 > Note about the fasta files: PhyPro uses the following tag system: `Xx_yyy|genome_version-locus`. The `Xx` is the first two letters of the genus and `yyy` the first three characters of the species name. The pipe symbol `|` is used to divide this "human readable" hint of from which organism this is from and the what MiST3 calls `stable id`. This id is the new accession number of the genome version in the NCBI database following by the new locus tag.
 
+## PhyloProfile pipeline
+
+```
 Next, PhyPro automatically will stream all `.json` files through a pipeline that uses the PFQL rules to build fasta files with members of each protein family.
 
 In summary the `--fetch-data` step is:
@@ -154,6 +159,8 @@ In summary the `--fetch-data` step is:
 1) get data from MiST3 and SeqDepot database
 2) store raw data in `.json.gz` format and sequence data in fasta file format.
 3) builds fasta files with sequences for each protein family described in the config file.
+```
+
 
 ## Keep going
 
