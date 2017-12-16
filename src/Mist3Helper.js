@@ -11,17 +11,17 @@ const log = bunyan.createLogger(
 )
 
 let httpOptions = {
-	method: 'GET',
 	hostname: 'api.mistdb.com',
 	port: 5000,
-	headers: {},
 	agent: false
 }
 
 exports.getImmediateChildren = (taxid) => {
+	httpOptions.method = 'GET'
+	httpOptions.header = {}
+	httpOptions.path = '/v1/taxonomy/' + taxid + '/children?immediate=true'
 	return new Promise((resolve, reject) => {
 		log.info('Fetching taxonomy information from Mist3 for taxid: ' + taxid)
-		httpOptions.path = '/v1/taxonomy/' + taxid + '/children?immediate=true'
 		const req = http.request(httpOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
@@ -44,9 +44,11 @@ exports.getImmediateChildren = (taxid) => {
 }
 
 exports.getChildren = (taxid) => {
+	httpOptions.method = 'GET'
+	httpOptions.header = {}
+	httpOptions.path = '/v1/taxonomy/' + taxid + '/children'
 	return new Promise((resolve, reject) => {
 		log.info('Fetching taxonomy information from Mist3 for taxid: ' + taxid)
-		httpOptions.path = '/v1/taxonomy/' + taxid + '/children'
 		const req = http.request(httpOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
@@ -73,7 +75,7 @@ exports.getGenesByGenome = (version) => {
 	const allGenes = []
 	let page = 1
 	const getGenes = (v, p) => {
-		return new Promise((resolve, rejectg) => {
+		return new Promise((resolve, reject) => {
 			exports.getGenesByGenomePerPage(v, p)
 				.then((newGenes) => {
 					if (newGenes.length !== 0) {
@@ -95,6 +97,8 @@ exports.getGenesByGenome = (version) => {
 
 exports.getGenomeInfoByVersion = (version) => {
 	httpOptions.path = '/v1/genomes/' + version
+	httpOptions.method = 'GET'
+	httpOptions.header = {}
 	return new Promise((resolve, reject) => {
 		log.info('Fetching info from genome: ' + version )
 		const req = http.request(httpOptions, function(res) {
@@ -113,8 +117,9 @@ exports.getGenomeInfoByVersion = (version) => {
 }
 
 exports.getGenesByGenomePerPage = (version, page = 1) => {
-	const genes = []
 	const genesPerPage = 100
+	httpOptions.method = 'GET'
+	httpOptions.header = {}
 	httpOptions.path = '/v1/genomes/' + version + '/genes?per_page=' + genesPerPage + '&page=' + page
 	return new Promise((resolve, reject) => {
 		log.info('Fetching genes from MiST3 : ' + version + ' page ' + page)
@@ -135,6 +140,8 @@ exports.getGenesByGenomePerPage = (version, page = 1) => {
 
 exports.getGenomesByTaxids = (taxids = []) => {
 	const taxidList = taxids.join(',')
+	httpOptions.method = 'GET'
+	httpOptions.header = {}
 	httpOptions.path = '/v1/genomes?where.taxonomy_id=' + taxidList
 	return new Promise((resolve, reject) => {
 		log.info('Fetching genome information from MiST3')
@@ -153,17 +160,32 @@ exports.getGenomesByTaxids = (taxids = []) => {
 	})
 }
 
-exports.getSequenceFromAseqs = (aseqs = []) => {
+exports.getInfoFromAseqs = (aseqs = [], options = {throwError: true}) => {
 	httpOptions.method = 'POST'
 	httpOptions.path = '/v1/aseqs'
-	const content = 'eALFsiVPvD8jtNe_9Qifig\nY-Vq_1fWWNkEnvpwVCRotw'
-	log.info('Fetching sequence information from MiST3')
-	const req = http.request(httpOptions, (res) => {
-		console.log(res.statusCode)
-		console.log(res.statusMessage)
-		res.on('data', console.log)
-		res.on('error', console.log)
+	httpOptions.headers = {
+		'Content-Type': 'application/json'
+	}
+	const content = JSON.stringify(aseqs)
+	log.info(`Fetching information for ${aseqs.length} sequences from MiST3`)
+	let buffer = []
+	return new Promise((resolve, reject) => {
+		const req = http.request(httpOptions, (res) => {
+			if (res.statusCode === 400)
+				reject(res)
+			if (res.statusCode !== 200)
+				reject(res)
+			res.on('data', (data) => {
+				buffer.push(data)
+			})
+			res.on('error', reject)
+			res.on('end', () => {
+				log.info('All set')
+				const items = JSON.parse(Buffer.concat(buffer))
+				resolve(items)
+			})
+		})
+		req.write(content)
+		req.end()
 	})
-	req.write(content)
-	req.end()
 }
