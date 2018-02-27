@@ -1,14 +1,19 @@
 'use strict'
 
-let chai = require('chai'),
-	path = require('path'),
-	fs = require('fs'),
-	glob = require('glob'),
-	rimraf = require('rimraf')
+const path = require('path')
+const fs = require('fs')
+const glob = require('glob')
+const rimraf = require('rimraf')
 
-chai.use(require('chai-fs'))
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const chaiFs = require('chai-fs')
 
-let expect = chai.expect
+chai.use(chaiAsPromised)
+chai.use(chaiFs)
+
+const expect = chai.expect
+const should = chai.should()
 
 let PhyPro = require('./PhyPro.js')
 
@@ -200,7 +205,7 @@ describe('PhyPro', function() {
 		})
 	})
 	describe('storeInfo_', function() {
-		it('should work', function(done) {
+		it.only('should work', function() {
 			this.timeout(35000)
 			process.chdir(testPath)
 			const projectName = 'template'
@@ -208,11 +213,26 @@ describe('PhyPro', function() {
 			const configFile = 'validateOk.phypro.template.config.json'
 			phypro.init()
 			phypro.loadConfigFile(configFile)
-			phypro.storeInfo_().then(function() {
-				done()
+			return phypro.storeInfo_().then(() => {
+				const configFilenamePattern = path.resolve(testPath, 'phypro.template*.fa')
+				const files = glob.glob.sync(configFilenamePattern)
+				const fastaEntries = []
+				files.forEach((file) => {
+					let biggerThanCount = 0
+					fs.createReadStream(file)
+						.on('data', function(d) {
+							const data = d.toString()
+							biggerThanCount += (data.match(/>/g) || []).length
+						})
+						.on('end', () => {
+							fastaEntries.push(biggerThanCount)
+						})
+					console.log(fastaEntries)
+				})
+				return expect(fastaEntries).eql([2244, 6525])
 			})
 		})
-		after(function() {
+		/* after(function() {
 			pipelines.forEach((pipeline) => {
 				rimraf.sync(path.resolve(testPath, pipeline))
 			})
@@ -222,7 +242,7 @@ describe('PhyPro', function() {
 			files.forEach(function(file) {
 				fs.unlinkSync(file)
 			})
-		})
+		}) */
 	})
 })
 

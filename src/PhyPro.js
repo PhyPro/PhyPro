@@ -5,17 +5,18 @@ const path = require('path')
 const bunyan = require('bunyan')
 const mkdirp = require('mkdirp')
 const jsonfile = require('jsonfile')
-const zlib = require('zlib')
+const pfql = require('pfql')
 
+const mist3Helper = require('./Mist3Helper')
+
+const ConfigUtils = require('./ConfigUtils')
+const fetchData = require('./fetchData')
+const FileName = require('./FileName')
+const saveFasta = require('./saveFasta')
+const saveInfo = require('./saveInfo')
 
 const availablePipelines = require('../src/availablePipelines.json')
-
 const pipelines = Object.keys(availablePipelines)
-
-const mist3 = require('./Mist3Helper.js')
-const ConfigUtils = require('./ConfigUtils.js')
-const fetchData = require('./fetchData')
-
 
 module.exports =
 class PhyPro {
@@ -34,6 +35,7 @@ class PhyPro {
 		this.config_.header.history = {}
 		this.config_.empty = true
 		this.log = bunyan.createLogger({name: 'PhyPro - ' + ProjectName})
+		this.genomicInfoPath = './genomicInfo'
 	}
 
 	config() {
@@ -99,6 +101,7 @@ class PhyPro {
 
 	fetchData() {
 		return this.storeInfo_()
+			// .then(this.separateRelevantInfo())
 	}
 
 	keepGoing(pipelineChoices) {
@@ -124,24 +127,53 @@ class PhyPro {
 	}
 
 	storeInfo_() {
-		const genomicInfoPath = './genomicInfo'
 		const configUtils = new ConfigUtils(this.config_)
 		const taxids = configUtils.getTaxids()
+		this.log.info(`Fetching and storing information from ${taxids.length} genomes.`)
 		return new Promise((resolve, reject) => {
-			mist3.getGenomesByTaxids(taxids).then((genomes) => {
-				const promises = []
-				genomes.forEach((genome) => {
-					const version = genome.version
-					const filename = 'phypro.' + this.config_.header.ProjectName + '.genes.' + version + '.json.gz'
-					const fasta = version + '.fa'
-					const filePath = path.resolve(genomicInfoPath, filename)
-					const fastaPath = path.resolve(genomicInfoPath, fasta)
-					promises.push(fetchData.proteinInfoToFiles(genome, filePath, fastaPath))
+			mist3Helper.getGenomesByTaxids(taxids)
+				.then((genomes) => {
+					const promises = []
+					genomes.forEach((genome) => {
+						const version = genome.version
+						const fetched = fetchData(genome)
+						promises.push(fetched.then((data) => {
+							const filename = 'phypro.' + this.config_.header.ProjectName + '.genes.' + genome.taxonomy_id + '.json.gz'
+							const filePath = path.resolve(this.genomicInfoPath, filename)
+							return saveInfo(data.genes, filePath)
+						}))
+						promises.push(fetched.then((data) => {
+							const fasta = 'phypro.' + this.config_.header.ProjectName + '.aa.' + genome.taxonomy_id + '.fa'
+							const fastaPath = path.resolve(this.genomicInfoPath, fasta)
+							return saveFasta(data.fastaEntries, fastaPath)
+						})
+						)
+					})
+					return Promise.all(promises)
+						.then(() => {
+							resolve()
+						})
+						.catch(reject)
 				})
-				Promise.all(promises).then(resolve)
-			})
+				.catch(reject)
 		})
 	}
+
+	separateRelevantInfo() {
+		const configUtils = new ConfigUtils(this.config_)
+		const taxids = configUtils.getTaxids()
+		const filename = new FileName(this.config_.header.ProjectName)
+
+		const queryRules = this.config_.phyloProfile.PfqlDefinitions
+		const pfqlStream = new pfql.PFQLStream(queryRules)
+		pfqlStream.initRules()
+
+		taxids.forEach((taxid) => {
+			const geneInfoZipFilename = filename.genomeInfoZip(taxid)
+			fs.ReadStream(geneInfoZipFilename).pipe(pfqlStream)
+		})
+	}
+
 
 	checkStructureOfConfig_() {
 		if (!(this.config_.header))
