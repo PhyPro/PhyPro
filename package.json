@@ -28,14 +28,16 @@
   },
   "homepage": "https://github.com/PhyPro/PhyPro#readme",
   "dependencies": {
-    "argparse": "^1.0.9",
+    "argparse": "^1.0.10",
     "bluebird": "^3.5.1",
     "bunyan": "^1.8.12",
+    "chalk": "^2.4.1",
+    "figlet": "^1.2.0",
     "istanbul": "^0.4.5",
     "jsonfile": "^4.0.0",
     "mkdirp": "^0.5.1",
-    "node-mist3": "^1.4.8",
-    "pfql": "^1.2.0",
+    "node-mist3": "github:biowonks/node-mist3#changing-api-hostname",
+    "pfql": "^1.2.1",
     "shelljs": "^0.7.8",
     "through2": "^2.0.3",
     "tnt.tree": "github:daviortega/tnt.tree#d3v4"
@@ -44,13 +46,13 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-fs": "^1.0.0",
-    "coveralls": "^3.0.0",
-    "eslint": "^4.11.0",
-    "mocha": "^4.0.1",
+    "coveralls": "^3.0.1",
+    "eslint": "^4.19.1",
+    "mocha": "^4.1.0",
     "mocha-bunyan-reporter": "0.0.2",
     "mocha-lcov-reporter": "^1.3.0",
     "mocha-pretty-bunyan-nyan": "^1.0.4",
-    "nyc": "^11.3.0",
+    "nyc": "^11.9.0",
     "rimraf": "^2.6.2"
   }
 }
