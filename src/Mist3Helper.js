@@ -1,6 +1,6 @@
 'use strict'
 
-const http = require('http')
+const https = require('https')
 const Promise = require('bluebird')
 const bunyan = require('bunyan')
 
@@ -10,26 +10,38 @@ const log = bunyan.createLogger(
 	}
 )
 
-let httpOptions = {
-	hostname: 'api.mistdb.com',
-	port: 5000,
+let httpsOptions = {
+	hostname: 'api.mistdb.caltech.edu',
+	headers: {},
 	agent: false
 }
 
+const kDefaults = {
+	maxTaxonomy: 30
+}
+
+
 exports.getImmediateChildren = (taxid) => {
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	httpOptions.path = '/v1/taxonomy/' + taxid + '/children?immediate=true'
+	httpsOptions.method = 'GET'
+	httpsOptions.header = {}
+	httpsOptions.path = '/v1/taxonomy/' + taxid + '/children?immediate=true'
 	return new Promise((resolve, reject) => {
 		log.info('Fetching taxonomy information from Mist3 for taxid: ' + taxid)
-		const req = http.request(httpOptions, function(res) {
+		const req = https.request(httpsOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
 				chunks.push(chunk)
 			})
 			res.on('end', function() {
 				log.info('received information from taxid ' + taxid)
-				let items = JSON.parse(Buffer.concat(chunks))
+				const data = Buffer.concat(chunks)
+				let items = ''
+				try {
+					items = JSON.parse(data)
+				}
+				catch (err) {
+					log.error(data)
+				}
 				let taxids = []
 				if (items) {
 					items.forEach((item) => {
@@ -44,20 +56,27 @@ exports.getImmediateChildren = (taxid) => {
 }
 
 exports.getChildren = (taxid) => {
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	httpOptions.path = '/v1/taxonomy/' + taxid + '/children'
+	httpsOptions.method = 'GET'
+	httpsOptions.header = {}
+	httpsOptions.path = '/v1/taxonomy/' + taxid + '/children'
 	return new Promise((resolve, reject) => {
 		log.info('Fetching taxonomy information from Mist3 for taxid: ' + taxid)
-		const req = http.request(httpOptions, function(res) {
+		const req = https.request(httpsOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
 				chunks.push(chunk)
 			})
 			res.on('end', function() {
 				log.info('received information from taxid ' + taxid)
-				log.info(httpOptions.path)
-				let items = JSON.parse(Buffer.concat(chunks))
+				log.info(httpsOptions.path)
+				const data = Buffer.concat(chunks)
+				let items = ''
+				try {
+					items = JSON.parse(data)
+				}
+				catch (err) {
+					log.error(data.toString())
+				}
 				let taxids = []
 				if (items) {
 					items.forEach((item) => {
@@ -71,81 +90,14 @@ exports.getChildren = (taxid) => {
 	})
 }
 
-exports.getGenesByGenome = (version) => {
-	const allGenes = []
-	let page = 1
-	const getGenes = (v, p) => {
-		return new Promise((resolve, reject) => {
-			exports.getGenesByGenomePerPage(v, p)
-				.then((newGenes) => {
-					if (newGenes.length !== 0) {
-						newGenes.forEach((gene) => {
-							allGenes.push(gene)
-						})
-						p++
-						resolve(getGenes(v, p))
-					}
-					else {
-						resolve(allGenes)
-					}
-				})
-		})
-	}
-	return getGenes(version, page)
-}
-
-
-exports.getGenomeInfoByVersion = (version) => {
-	httpOptions.path = '/v1/genomes/' + version
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	return new Promise((resolve, reject) => {
-		log.info('Fetching info from genome: ' + version )
-		const req = http.request(httpOptions, function(res) {
-			const chunks = []
-			res.on('data', function(chunk) {
-				chunks.push(chunk)
-			})
-			res.on('end', function() {
-				log.info('Information from genome ' + version + ' was received.')
-				const info = JSON.parse(Buffer.concat(chunks))
-				resolve(info)
-			})
-		})
-		req.end()
-	})
-}
-
-exports.getGenesByGenomePerPage = (version, page = 1) => {
-	const genesPerPage = 100
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	httpOptions.path = '/v1/genomes/' + version + '/genes?per_page=' + genesPerPage + '&page=' + page
-	return new Promise((resolve, reject) => {
-		log.info('Fetching genes from MiST3 : ' + version + ' page ' + page)
-		const req = http.request(httpOptions, function(res) {
-			const chunks = []
-			res.on('data', function(chunk) {
-				chunks.push(chunk)
-			})
-			res.on('end', function() {
-				log.info('Information from genome ' + version + ' was received.')
-				const newGenes = JSON.parse(Buffer.concat(chunks))
-				resolve(newGenes)
-			})
-		})
-		req.end()
-	})
-}
-
-exports.getGenomesByTaxids = (taxids = []) => {
+const getGenomesByTaxidsBatch = (taxids = []) => {
 	const taxidList = taxids.join(',')
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	httpOptions.path = '/v1/genomes?where.taxonomy_id=' + taxidList
+	httpsOptions.method = 'GET'
+	httpsOptions.header = {}
+	httpsOptions.path = '/v1/genomes?where.taxonomy_id=' + taxidList
 	return new Promise((resolve, reject) => {
-		log.info('Fetching genome information from MiST3')
-		const req = http.request(httpOptions, function(res) {
+		let count = 0
+		const req = https.request(httpsOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
 				chunks.push(chunk)
@@ -160,32 +112,29 @@ exports.getGenomesByTaxids = (taxids = []) => {
 	})
 }
 
-exports.getInfoFromAseqs = (aseqs = [], options = {throwError: true}) => {
-	httpOptions.method = 'POST'
-	httpOptions.path = '/v1/aseqs'
-	httpOptions.headers = {
-		'Content-Type': 'application/json'
-	}
-	const content = JSON.stringify(aseqs)
-	log.info(`Fetching information for ${aseqs.length} sequences from MiST3`)
-	let buffer = []
+exports.getGenomesByTaxids = (taxids = []) => {
+	log.info('Fetching genome information from MiST3')
 	return new Promise((resolve, reject) => {
-		const req = http.request(httpOptions, (res) => {
-			if (res.statusCode === 400)
-				reject(res)
-			if (res.statusCode !== 200)
-				reject(res)
-			res.on('data', (data) => {
-				buffer.push(data)
-			})
-			res.on('error', reject)
-			res.on('end', () => {
-				log.info('All set')
-				const items = JSON.parse(Buffer.concat(buffer))
-				resolve(items)
-			})
+		const taxidsBatches = []
+
+		const unique = taxids.filter((v, i, a) => {
+			return a.indexOf(v) === i
 		})
-		req.write(content)
-		req.end()
+
+		log.info(`There are ${unique.length} unique taxids`)
+
+		while (unique.length !== 0) {
+			const batch = unique.splice(0, kDefaults.maxTaxonomy)
+			taxidsBatches.push(getGenomesByTaxidsBatch(batch))
+		}
+		let allGenomeInfo = []
+		Promise.all(taxidsBatches)
+			.then((genomeInfoBatches) => {
+				genomeInfoBatches.forEach((genomeInfoBatch) => {
+					allGenomeInfo = allGenomeInfo.concat(genomeInfoBatch)
+				})
+				resolve(allGenomeInfo)
+			})
+			.catch(reject)
 	})
 }

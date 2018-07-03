@@ -184,7 +184,7 @@ If we have all these softwares, we can _keep going_ with:
 $ phypro t4p --keepgoing phyloProfile refTree
 ```
 
-If PhyPro is capable to finish both pipelines without a hickup, it will automatically pack our results and it is ready to be loaded by the analyser.
+If PhyPro is capable to finish both pipelines without a hick-up, it will automatically pack our results and is ready to be loaded by the analyser.
 
 ## How to make a pipeline
 

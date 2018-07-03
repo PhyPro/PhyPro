@@ -1,14 +1,19 @@
 'use strict'
 
-let chai = require('chai'),
-	path = require('path'),
-	fs = require('fs'),
-	glob = require('glob'),
-	rimraf = require('rimraf')
+const path = require('path')
+const fs = require('fs')
+const glob = require('glob')
+const rimraf = require('rimraf')
 
-chai.use(require('chai-fs'))
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const chaiFs = require('chai-fs')
 
-let expect = chai.expect
+chai.use(chaiAsPromised)
+chai.use(chaiFs)
+
+const expect = chai.expect
+const should = chai.should()
 
 let PhyPro = require('./PhyPro.js')
 
@@ -200,16 +205,24 @@ describe('PhyPro', function() {
 		})
 	})
 	describe('storeInfo_', function() {
-		it('should work', function(done) {
+		it('should work', function() {
 			this.timeout(35000)
 			process.chdir(testPath)
+			const expectedNumProteins = [660, 2248]
 			const projectName = 'template'
 			const phypro = new PhyPro(projectName)
 			const configFile = 'validateOk.phypro.template.config.json'
 			phypro.init()
 			phypro.loadConfigFile(configFile)
-			phypro.storeInfo_().then(function() {
-				done()
+			return phypro.storeInfo_().then(() => {
+				const configFilenamePattern = path.resolve(testPath, 'genomicInfo', 'phypro.template*.fa')
+				const files = glob.glob.sync(configFilenamePattern)
+				const fastaEntries = []
+				files.forEach((file) => {
+					const data = fs.readFileSync(file).toString()
+					fastaEntries.push((data.match(/>/g) || []).length)
+				})
+				return expect(fastaEntries).eql(expectedNumProteins)
 			})
 		})
 		after(function() {

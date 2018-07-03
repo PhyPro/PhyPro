@@ -79,9 +79,14 @@ else if (args.check_config) {
 }
 else if (args.fetch_data) {
 	phypro.loadConfigFile()
-	phypro.fetchData().then(() => {
-		phypro.logInfo('Data is in place, proceed with the pipeline of choice.')
-	})
+	phypro.fetchData()
+		.then(() => {
+			phypro.logInfo('Data is in place, proceed with the pipeline of choice.')
+		})
+		.catch((err) => {
+			console.log(err)
+			throw err
+		})
 }
 
 else {

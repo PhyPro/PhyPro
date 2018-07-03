@@ -3,9 +3,6 @@
 const Pipeline = require('./Pipeline.js')
 
 const stages = [
-	'init',
-	'fetchGenomeData',
-	'fetchProteinData',
 	'makeFastaFiles',
 	'trimSequences',
 	'BLASTAll',
