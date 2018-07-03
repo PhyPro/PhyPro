@@ -6,7 +6,7 @@ const figlet = require('figlet')
 const chalk = require('chalk')
 
 const args = process.argv.slice(2).join(' ')
-const path2phypro = path.resolve(__dirname, 'phypro.js')
+const path2phypro = path.resolve(__dirname, 'pickGenomes.bin.js')
 const path2bunyan = path.resolve(__dirname, '..', 'node_modules/.bin/bunyan')
 
 const splash = figlet.textSync('phypro-pickGenomes', {horizontalLayout: 'fitted'})
