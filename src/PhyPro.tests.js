@@ -205,34 +205,27 @@ describe('PhyPro', function() {
 		})
 	})
 	describe('storeInfo_', function() {
-		it.only('should work', function() {
+		it('should work', function() {
 			this.timeout(35000)
 			process.chdir(testPath)
+			const expectedNumProteins = [660, 2248]
 			const projectName = 'template'
 			const phypro = new PhyPro(projectName)
 			const configFile = 'validateOk.phypro.template.config.json'
 			phypro.init()
 			phypro.loadConfigFile(configFile)
 			return phypro.storeInfo_().then(() => {
-				const configFilenamePattern = path.resolve(testPath, 'phypro.template*.fa')
+				const configFilenamePattern = path.resolve(testPath, 'genomicInfo', 'phypro.template*.fa')
 				const files = glob.glob.sync(configFilenamePattern)
 				const fastaEntries = []
 				files.forEach((file) => {
-					let biggerThanCount = 0
-					fs.createReadStream(file)
-						.on('data', function(d) {
-							const data = d.toString()
-							biggerThanCount += (data.match(/>/g) || []).length
-						})
-						.on('end', () => {
-							fastaEntries.push(biggerThanCount)
-						})
-					console.log(fastaEntries)
+					const data = fs.readFileSync(file).toString()
+					fastaEntries.push((data.match(/>/g) || []).length)
 				})
-				return expect(fastaEntries).eql([2244, 6525])
+				return expect(fastaEntries).eql(expectedNumProteins)
 			})
 		})
-		/* after(function() {
+		after(function() {
 			pipelines.forEach((pipeline) => {
 				rimraf.sync(path.resolve(testPath, pipeline))
 			})
@@ -242,7 +235,7 @@ describe('PhyPro', function() {
 			files.forEach(function(file) {
 				fs.unlinkSync(file)
 			})
-		}) */
+		})
 	})
 })
 
