@@ -9,7 +9,7 @@ const should = chai.should
 
 const seqdepot = require('./SeqdepotHelper')
 
-describe('SeqdepotHelper', function() {
+describe.skip('SeqdepotHelper', function() {
 	describe('getInfoFromAseqs', function() {
 		it('should pass', function() {
 			const aseqs = [
