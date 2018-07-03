@@ -1,6 +1,6 @@
 'use strict'
 
-const http = require('http')
+const https = require('https')
 const Promise = require('bluebird')
 const bunyan = require('bunyan')
 
@@ -10,9 +10,9 @@ const log = bunyan.createLogger(
 	}
 )
 
-let httpOptions = {
-	hostname: 'api.mistdb.com',
-	port: 5000,
+let httpsOptions = {
+	hostname: 'api.mistdb.caltech.edu',
+	headers: {},
 	agent: false
 }
 
@@ -22,19 +22,26 @@ const kDefaults = {
 
 
 exports.getImmediateChildren = (taxid) => {
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	httpOptions.path = '/v1/taxonomy/' + taxid + '/children?immediate=true'
+	httpsOptions.method = 'GET'
+	httpsOptions.header = {}
+	httpsOptions.path = '/v1/taxonomy/' + taxid + '/children?immediate=true'
 	return new Promise((resolve, reject) => {
 		log.info('Fetching taxonomy information from Mist3 for taxid: ' + taxid)
-		const req = http.request(httpOptions, function(res) {
+		const req = https.request(httpsOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
 				chunks.push(chunk)
 			})
 			res.on('end', function() {
 				log.info('received information from taxid ' + taxid)
-				let items = JSON.parse(Buffer.concat(chunks))
+				const data = Buffer.concat(chunks)
+				let items = ''
+				try {
+					items = JSON.parse(data)
+				}
+				catch (err) {
+					log.error(data)
+				}
 				let taxids = []
 				if (items) {
 					items.forEach((item) => {
@@ -49,20 +56,27 @@ exports.getImmediateChildren = (taxid) => {
 }
 
 exports.getChildren = (taxid) => {
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	httpOptions.path = '/v1/taxonomy/' + taxid + '/children'
+	httpsOptions.method = 'GET'
+	httpsOptions.header = {}
+	httpsOptions.path = '/v1/taxonomy/' + taxid + '/children'
 	return new Promise((resolve, reject) => {
 		log.info('Fetching taxonomy information from Mist3 for taxid: ' + taxid)
-		const req = http.request(httpOptions, function(res) {
+		const req = https.request(httpsOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
 				chunks.push(chunk)
 			})
 			res.on('end', function() {
 				log.info('received information from taxid ' + taxid)
-				log.info(httpOptions.path)
-				let items = JSON.parse(Buffer.concat(chunks))
+				log.info(httpsOptions.path)
+				const data = Buffer.concat(chunks)
+				let items = ''
+				try {
+					items = JSON.parse(data)
+				}
+				catch (err) {
+					log.error(data.toString())
+				}
 				let taxids = []
 				if (items) {
 					items.forEach((item) => {
@@ -78,12 +92,12 @@ exports.getChildren = (taxid) => {
 
 const getGenomesByTaxidsBatch = (taxids = []) => {
 	const taxidList = taxids.join(',')
-	httpOptions.method = 'GET'
-	httpOptions.header = {}
-	httpOptions.path = '/v1/genomes?where.taxonomy_id=' + taxidList
+	httpsOptions.method = 'GET'
+	httpsOptions.header = {}
+	httpsOptions.path = '/v1/genomes?where.taxonomy_id=' + taxidList
 	return new Promise((resolve, reject) => {
 		let count = 0
-		const req = http.request(httpOptions, function(res) {
+		const req = https.request(httpsOptions, function(res) {
 			const chunks = []
 			res.on('data', function(chunk) {
 				chunks.push(chunk)
