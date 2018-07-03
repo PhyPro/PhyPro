@@ -1,0 +1,53 @@
+{
+ "header": {
+  "ProjectName": "template",
+  "genomes": {
+   "background": [
+    {
+     "taxid": 1408462
+    },
+    {
+        "taxid": 67855,
+        "name": "Muribacter muris"
+    }
+   ],
+   "reference": []
+  },
+  "history": {
+   "initDate": "Thu Nov 16 2017 23:25:50 GMT-0800 (PST)"
+  }
+ },
+ "empty": true,
+ "phyloProfile": {
+  "history": {},
+  "stage": "init",
+  "stop": "",
+  "PfqlDefinitions": [
+    {
+		"prot_fam": "Secretins",
+		"rules": [
+			{
+				"Npos": [
+                    {
+                        "resource": "pfam30",
+                        "feature": "Secretin"
+                    }
+                ]
+			}
+		]
+	}
+ ],
+  "trimRules": {}
+ },
+ "refTree": {
+  "history": {},
+  "stage": "init",
+  "stop": "",
+  "gblockRules": {},
+  "phylogeny": {
+   "software": "",
+   "settings": ""
+  },
+  "cdds": []
+ }
+}
