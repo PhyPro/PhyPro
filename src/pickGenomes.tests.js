@@ -7,7 +7,7 @@ const glob = require('glob')
 const rimraf = require('rimraf')
 
 const testPath = path.resolve(__dirname, 'test-data')
-const availablePipelines = require('../src/availablePipelines.json')
+const availablePipelines = require('./availablePipelines.js')
 const pipelines = Object.keys(availablePipelines)
 
 const pickGenomes = require('./pickGenomes.js')

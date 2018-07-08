@@ -2,19 +2,19 @@
 
 module.exports =
 class FileName {
-	constructor(ProjectName, type) {
-		this.ProjectName = ProjectName
+	constructor(projectName, type) {
+		this.projectName = projectName
 	}
 
 	genomeInfoZip(taxid) {
-		return 'phypro.' + this.ProjectName + '.genes.' + taxid + '.json.gz'
+		return 'phypro.' + this.projectName + '.genes.' + taxid + '.json.gz'
 	}
 
 	genomeInfo(taxid) {
-		return 'phypro.' + this.ProjectName + '.genes.' + taxid + '.json'
+		return 'phypro.' + this.projectName + '.genes.' + taxid + '.json'
 	}
 
 	genomeFasta(taxid) {
-		return 'phypro.' + this.ProjectName + '.aa.' + taxid + '.fa'
+		return 'phypro.' + this.projectName + '.aa.' + taxid + '.fa'
 	}
 }

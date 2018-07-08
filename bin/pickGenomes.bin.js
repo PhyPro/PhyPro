@@ -36,7 +36,7 @@ parser.addArgument(
 		help: 'Automatically update the data to the correct place in the PhyPro config file of the project. Must pass the project name and be in the project\'s root directory',
 		nargs: 1,
 		metavar: [
-			'ProjectName'
+			'projectName'
 		]
 	}
 )

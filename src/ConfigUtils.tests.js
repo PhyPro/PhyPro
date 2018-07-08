@@ -10,7 +10,7 @@ describe('ConfigUtils', function() {
 		it('should return the config JSON', function() {
 			const config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: []
 					}
@@ -26,28 +26,28 @@ describe('ConfigUtils', function() {
 			const configUtils = new ConfigUtils(config)
 			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header section')
 		})
-		it('throws error if session "header.ProjectName" is missing', function() {
+		it('throws error if session "header.projectName" is missing', function() {
 			let config = {
 				header: {
 					genomes: {}
 				}
 			}
 			const configUtils = new ConfigUtils(config)
-			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.ProjectName section')
+			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.projectName section')
 		})
-		it('throws error if session "header.ProjectName" is missing', function() {
+		it('throws error if session "header.projectName" is missing', function() {
 			let config = {
 				header: {
 					genomes: {}
 				}
 			}
 			const configUtils = new ConfigUtils(config)
-			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.ProjectName section')
+			expect(configUtils.validate.bind(configUtils)).to.throw('No (or misplaced) mandatory header.projectName section')
 		})
 		it('throws error if session "header.genomes" is missing', function() {
 			let config = {
 				header: {
-					ProjectName: 'template'
+					projectName: 'template'
 				}
 			}
 			const configUtils = new ConfigUtils(config)
@@ -56,7 +56,7 @@ describe('ConfigUtils', function() {
 		it('throws error if session "header.genomes.background" is missing', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: []
 					}
@@ -68,7 +68,7 @@ describe('ConfigUtils', function() {
 		it('throws error if session "header.genomes.reference" is missing', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						background: []
 					}
@@ -80,7 +80,7 @@ describe('ConfigUtils', function() {
 		it('should throw error if item in background and reference are not Numbers or Objects', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						background: [
 							'121'
@@ -95,7 +95,7 @@ describe('ConfigUtils', function() {
 		it('should throw error if item in background and reference are not Numbers or Objects', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						background: [
 							[1]
@@ -110,7 +110,7 @@ describe('ConfigUtils', function() {
 		it('should throw error if Object in background does not have a the key "taxid"', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						background: [
 							{
@@ -127,7 +127,7 @@ describe('ConfigUtils', function() {
 		it('should throw error if Object in reference does not have a the key "taxid"', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: [
 							{
@@ -146,7 +146,7 @@ describe('ConfigUtils', function() {
 		it('should eliminate duplicates', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: [
 							{
@@ -166,7 +166,7 @@ describe('ConfigUtils', function() {
 		it('should eliminate duplicates', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: [
 							{
@@ -186,7 +186,7 @@ describe('ConfigUtils', function() {
 		it('should eliminate duplicates in background and keep reference', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: [
 							{
@@ -220,7 +220,7 @@ describe('ConfigUtils', function() {
 		it('Throw error if passed taxid is not a MiST genome', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: [
 							{
@@ -240,7 +240,7 @@ describe('ConfigUtils', function() {
 		it('should complete info in item', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: [
 							{
@@ -269,7 +269,7 @@ describe('ConfigUtils', function() {
 		it('should complete info in multiple taxonomy items even if it is just a number not an object', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						reference: [211586, 208964],
 						background: []
@@ -298,7 +298,7 @@ describe('ConfigUtils', function() {
 		it('should complete info in taxonomy item even if it is just a number not an object - in background genomes too', function() {
 			let config = {
 				header: {
-					ProjectName: 'template',
+					projectName: 'template',
 					genomes: {
 						background: [211586],
 						reference: []

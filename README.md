@@ -22,18 +22,18 @@ $ npm install phypro -g
 Start by making a new directory
 
 ```
-$ mkdir ProjectName
-$ cd ProjectName
-$ phypro --init ProjectName
+$ mkdir projectName
+$ cd projectName
+$ phypro --init projectName
 ```
 
-This will generate the file `phypro.ProjectName.config.json` that we must configure. It will also make a directory structure like this:
+This will generate the file `phypro.projectName.config.json` that we must configure. It will also make a directory structure like this:
 
 ```
-ProjectName/
+projectName/
     phyloProfile/
     refTree/
-    phypro.ProjectName.config.json
+    phypro.projectName.config.json
 ```
 
 ## Configuring the config file
@@ -106,7 +106,7 @@ As in the background genomes, PhyPro does not care of any of the fields but the 
 
 There are many ways to search for a certain protein family computationally. PhyPro builds up on another tool called PFQL - Protein Feature Query Language to perform this task more robustly. PFQL is able to filter proteins that has a specific feature architecture. It is called "feature" because it is a generalization of domain architecture. So PhyPro expects us to defiine a protein family by explicitly writing PFQL rules that defines a protein family.
 
-These rules are writen in the config file under the key: `phyloProfile.PfqlDefinitions`
+These rules are writen in the config file under the key: `phyloProfile.pfqlDefinitions`
 
 Please read the documentation on PFQL [here](https://github.com/biowonks/pfql/blob/master/manual.md)
 
@@ -118,7 +118,7 @@ Please read the documentation on PFQL [here](https://github.com/biowonks/pfql/bl
 To avoid wasting time, before we start the pipelines, PhyPro will ask to validate the config file and inform of any mistaken we might have made:
 
 ```
-$ phypro --check-config ProjectName
+$ phypro --check-config projectName
 ```
 
 It will try to be as informative as possible about any issue the config file might have. However, there are two special sections that are more error prone and PhyPro naturally pays more attention to them:
@@ -139,7 +139,7 @@ After we configure the config file, we are pretty much set. The next step is to 
 
 We can run it by this simple command:
 ```
-$ phypro ProjectName --fetch-data
+$ phypro projectName --fetch-data
 ```
 
  PhyPro uses the concept of `streams`. That means that as the data start to pour from the MiST3 database servers, PhyPro immediately start to parse the data in two fronts:
@@ -148,19 +148,6 @@ $ phypro ProjectName --fetch-data
 * whole genome fasta files are produced and stored in `.fa` files
 
 > Note about the fasta files: PhyPro uses the following tag system: `Xx_yyy|genome_version-locus`. The `Xx` is the first two letters of the genus and `yyy` the first three characters of the species name. The pipe symbol `|` is used to divide this "human readable" hint of from which organism this is from and the what MiST3 calls `stable id`. This id is the new accession number of the genome version in the NCBI database following by the new locus tag.
-
-## PhyloProfile pipeline
-
-```
-Next, PhyPro automatically will stream all `.json` files through a pipeline that uses the PFQL rules to build fasta files with members of each protein family.
-
-In summary the `--fetch-data` step is:
-
-1) get data from MiST3 and SeqDepot database
-2) store raw data in `.json.gz` format and sequence data in fasta file format.
-3) builds fasta files with sequences for each protein family described in the config file.
-```
-
 
 ## Keep going
 
@@ -185,6 +172,23 @@ $ phypro t4p --keepgoing phyloProfile refTree
 ```
 
 If PhyPro is capable to finish both pipelines without a hick-up, it will automatically pack our results and is ready to be loaded by the analyser.
+
+## PhyloProfile pipeline
+
+Next, PhyPro will go through a series of steps. Namely:
+
+|Step | Description |
+|-|-|
+|makeFastaFiles| Make fasta files for each protein family |
+
+
+
+below we will find a better description of each step:
+
+### makeFastaFile
+
+PhyPro will stream all `.json.gz` files through a pipeline that uses the PFQL rules to build fasta files with members of each protein family.
+
 
 ## How to make a pipeline
 

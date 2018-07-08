@@ -15,31 +15,36 @@ const FileName = require('./FileName')
 const saveFasta = require('./saveFasta')
 const saveInfo = require('./saveInfo')
 
-const availablePipelines = require('../src/availablePipelines.json')
+const availablePipelines = require('./availablePipelines.js')
 const pipelines = Object.keys(availablePipelines)
 
 module.exports =
 class PhyPro {
 	/**
 	 * Creates an instance of PhyPro.
-	 * @param {string} [ProjectName='']
+	 * @param {string} [projectName='']
 	 */
-	constructor(ProjectName = '') {
+	constructor(projectName = '') {
 		this.config_ = {}
 		this.config_.header = {}
-		this.config_.header.ProjectName = ProjectName !== '' ? ProjectName : 'ProjectName'
+		this.config_.header.projectName = projectName !== '' ? projectName : 'projectName'
 		this.config_.header.genomes = {
 			background: [],
 			reference: []
 		}
 		this.config_.header.history = {}
 		this.config_.empty = true
-		this.log = bunyan.createLogger({name: 'PhyPro - ' + ProjectName})
-		this.genomicInfoPath = './genomicInfo'
+		this.log = bunyan.createLogger({name: 'PhyPro - ' + projectName})
+		this.config_.header.projectPath = `./${projectName}`
+		this.config_.header.genomicInfoPath = `${this.config_.header.projectPath}/genomicInfo`
 	}
 
-	config() {
+	getConfig() {
 		return this.config_
+	}
+
+	setConfig(newConfig) {
+		this.config_ = newConfig
 	}
 
 	/**
@@ -47,25 +52,32 @@ class PhyPro {
 	 * @param {string} [localPath='./']
 	 */
 	init(localPath = './') {
-		this.config_.header.history.initDate = Date()
-		this.log.info('Project ' + this.config_.header.ProjectName + ' initialized.')
-		mkdirp.sync(path.resolve(localPath, 'genomicInfo'))
+		const projectPath = `${localPath}/${this.getConfig().header.projectName}`.replace('//', '/')
+		this.getConfig().header.projectPath = projectPath
+		const projectPathResolved = path.resolve(projectPath)
+		mkdirp.sync(projectPathResolved)
+		this.getConfig().header.history.initDate = Date()
+		this.log.info('Project ' + this.getConfig().header.projectName + ' initialized.')
+		this.getConfig().header.genomicInfoPath = `${projectPath}/genomicInfo`
+		mkdirp.sync(path.resolve(this.getConfig().header.genomicInfoPath))
 		pipelines.forEach((pipeline) => {
-			let PipeInstance = eval(availablePipelines[pipeline].start),
-				pipeInstance = new PipeInstance()
-			this.config_[pipeline] = pipeInstance.config
-			mkdirp.sync(path.resolve(localPath, pipeline))
+			const pipeInstance = new availablePipelines[pipeline](this.getConfig())
+			pipeInstance.init()
+			const updatedConfig = pipeInstance.getConfig()
+			this.setConfig(updatedConfig)
 			this.log.info('Pipeline ' + pipeline + ' initialized successfully')
 		})
-		let configFilename = 'phypro.' + this.config_.header.ProjectName + '.config.json'
+		let configFilename = 'phypro.' + this.getConfig().header.projectName + '.config.json'
 		let configFullPath = path.resolve(localPath, configFilename)
 
-		fs.writeFileSync(configFullPath, JSON.stringify(this.config_, null, ' '))
+		fs.writeFileSync(configFullPath, JSON.stringify(this.getConfig(), null, ' '))
 		console.log('Everything looks good, now you must config the config file and run this command again with the flag --keepgoing followed by the pipeline(s) you want to start running. You can run multiple pipelines as once, PhyPro will grab N-1 processors from your computer and divide equally between the tasks. For efficiency in big jobs, try running one pipeline at the time.')
 	}
 
 	loadConfigFile(configFilename) {
-		let filename = configFilename ? configFilename : 'phypro.' + this.config_.header.ProjectName + '.config.json'
+		let filename = configFilename ? configFilename : 'phypro.' + this.config_.header.projectName + '.config.json'
+		if (!(fs.existsSync(filename)))
+			throw new Error('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
 		try {
 			let config = jsonfile.readFileSync(filename, 'utf8')
 			this.config_ = config
@@ -101,20 +113,25 @@ class PhyPro {
 
 	fetchData() {
 		return this.storeInfo_()
-			// .then(this.separateRelevantInfo())
 	}
 
 	keepGoing(pipelineChoices) {
-		this.isValidProjectStructure_()
 		if (this.config_.empty)
 			this.loadConfigFile()
+		this.isValidProjectStructure_()
+		const promises = []
 		pipelineChoices.forEach((pipeline) => {
-			let PipeInstance = eval(availablePipelines[pipeline].start),
-				pipeInstance = new PipeInstance()
-			pipeInstance.loadConfig(this.config_[pipeline])
-			this.log.info('Config file for ' + pipeline + ' loaded successfully')
-			pipeInstance.keepGoing()
+			// const PipeInstance = availablePipelines[pipeline]
+			const pipeInstance = new availablePipelines[pipeline](this.config_)
+			promises.push(pipeInstance.keepGoing())
 		})
+		Promise.all(promises)
+			.then(() => {
+				this.log.info('Pipeline done')
+			})
+			.catch((err) => {
+				throw err
+			})
 	}
 
 	logInfo(msg) {
@@ -138,13 +155,14 @@ class PhyPro {
 						const version = genome.version
 						const fetched = fetchData(genome)
 						promises.push(fetched.then((data) => {
-							const filename = 'phypro.' + this.config_.header.ProjectName + '.genes.' + genome.taxonomy_id + '.json.gz'
-							const filePath = path.resolve(this.genomicInfoPath, filename)
+							const filename = 'phypro.' + this.config_.header.projectName + '.genes.' + genome.taxonomy_id + '.json.gz'
+							const filePath = path.resolve(this.config_.header.genomicInfoPath, filename)
 							return saveInfo(data.genes, filePath)
 						}))
 						promises.push(fetched.then((data) => {
-							const fasta = 'phypro.' + this.config_.header.ProjectName + '.aa.' + genome.taxonomy_id + '.fa'
-							const fastaPath = path.resolve(this.genomicInfoPath, fasta)
+							const fasta = 'phypro.' + this.config_.header.projectName + '.aa.' + genome.taxonomy_id + '.fa'
+							const fastaPath = path.resolve(this.config_.header.genomicInfoPath, fasta)
+							this.log.info(`Saving data to: ${fastaPath}`)
 							return saveFasta(data.fastaEntries, fastaPath)
 						})
 						)
@@ -162,9 +180,9 @@ class PhyPro {
 	separateRelevantInfo() {
 		const configUtils = new ConfigUtils(this.config_)
 		const taxids = configUtils.getTaxids()
-		const filename = new FileName(this.config_.header.ProjectName)
+		const filename = new FileName(this.config_.header.projectName)
 
-		const queryRules = this.config_.phyloProfile.PfqlDefinitions
+		const queryRules = this.config_.phyloProfile.pfqlDefinitions
 		const pfqlStream = new pfql.PFQLStream(queryRules)
 		pfqlStream.initRules()
 
@@ -178,8 +196,8 @@ class PhyPro {
 	checkStructureOfConfig_() {
 		if (!(this.config_.header))
 			throw new Error('No (or misplaced) mandatory header section')
-		if (!(this.config_.header.ProjectName))
-			throw new Error('No (or misplaced) mandatory header.ProjectName section')
+		if (!(this.config_.header.projectName))
+			throw new Error('No (or misplaced) mandatory header.projectName section')
 		if (!(this.config_.header.genomes))
 			throw new Error('No (or misplaced) mandatory header.genomes section')
 		let typeOfGenomes = ['background', 'reference']
@@ -190,12 +208,13 @@ class PhyPro {
 	}
 
 	isValidProjectStructure_() {
-		if (!(fs.existsSync('phypro.' + this.config_.header.ProjectName + '.config.json')))
-			throw new Error('The config file for this project does not exists. Please check the project name and if this is the correct directory.')
-		if (!(fs.existsSync('genomicInfo')))
+		if (!(fs.existsSync(this.config_.header.genomicInfoPath)))
 			throw new Error('The current directory does not have the genomicInfo folder. Please check if this is the correct directory.')
 		pipelines.forEach((pipeline) => {
-			if (!(fs.existsSync(pipeline)))
+			const pipelinePath = this.config_[pipeline].path
+			console.log(pipelinePath)
+			console.log(fs.existsSync(pipelinePath))
+			if (!(fs.existsSync(pipelinePath)))
 				throw new Error('The current directory does not have the ' + pipeline + ' folder. Please check if this is the correct directory.')
 		})
 		this.log.info('Project structure seems ok :)')

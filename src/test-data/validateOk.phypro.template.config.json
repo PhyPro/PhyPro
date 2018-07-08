@@ -1,6 +1,7 @@
 {
  "header": {
-  "ProjectName": "template",
+  "projectName": "template",
+  "genomicInfoPath": "/home/ortegad/Projects/repos/phypro/src/test-data/template/genomicInfo",
   "genomes": {
    "background": [
     {
@@ -11,7 +12,12 @@
         "name": "Muribacter muris"
     }
    ],
-   "reference": []
+   "reference": [
+        {
+            "name": "Pseudomonas aeruginosa PAO1",
+            "taxid":  208964
+        }
+   ]
   },
   "history": {
    "initDate": "Thu Nov 16 2017 23:25:50 GMT-0800 (PST)"
@@ -19,18 +25,37 @@
  },
  "empty": true,
  "phyloProfile": {
+ "stages": [
+    "makeFastaFiles",
+    "trimSequences",
+    "blastAll",
+    "parseBlastData"
+ ],
   "history": {},
   "stage": "init",
   "stop": "",
-  "PfqlDefinitions": [
+  "pfqlDefinitions": [
     {
 		"prot_fam": "Secretins",
 		"rules": [
 			{
 				"Npos": [
                     {
-                        "resource": "pfam30",
+                        "resource": "pfam31",
                         "feature": "Secretin"
+                    }
+                ]
+			}
+		]
+    },
+    {
+		"prot_fam": "SecretinShortDomain",
+		"rules": [
+			{
+				"Npos": [
+                    {
+                        "resource": "pfam31",
+                        "feature": "STN"
                     }
                 ]
 			}

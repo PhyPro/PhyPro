@@ -9,7 +9,7 @@ module.exports = (genome) => {
 	const mistGenes = new mist3.Genes()
 	const mkFasta = new mist3.MakeFasta(genome)
 
-	return mistGenes.byGenome(genome.version)
+	return mistGenes.byGenomeVersion(genome.version)
 		.then((newGenes) => {
 			log.debug('Adding aseq info')
 			return mistGenes.addAseqInfo(newGenes, {keepGoing: true})
@@ -19,7 +19,7 @@ module.exports = (genome) => {
 		})
 		.then((newGenes) => {
 			log.debug('Processing gene info')
-			const fastaEntries = mkFasta.process(newGenes, {skipNull: true})
+			const fastaEntries = mkFasta.processMany(newGenes, {skipNull: true})
 			return {
 				fastaEntries,
 				genes: newGenes

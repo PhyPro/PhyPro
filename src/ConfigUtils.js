@@ -22,7 +22,7 @@ class ConfigUtils {
 	validate() {
 		this.checkStructureOfConfig_()
 		this.checkGenomes_()
-		this.checkPfqlRules_(this.config_.phyloProfile.PfqlDefinitions)
+		this.checkPfqlRules_(this.config_.phyloProfile.pfqlDefinitions)
 	}
 
 	fixDuplicates() {
@@ -35,10 +35,11 @@ class ConfigUtils {
 		return this.updateTaxInfoMiST_('reference').then(() => this.updateTaxInfoMiST_('background'))
 	}
 
-	getTaxids() {
+	getTaxids(header) {
+		const source = header || this.config_.header
 		if (this.taxids_.length === 0) {
 			typesOfGenomes.forEach((type) => {
-				this.config_.header.genomes[type].forEach((genome) => {
+				source.genomes[type].forEach((genome) => {
 					this.taxids_.push(genome.taxid)
 				})
 			})
@@ -68,8 +69,8 @@ class ConfigUtils {
 	checkStructureOfConfig_() {
 		if (!(this.config_.header))
 			throw new Error('No (or misplaced) mandatory header section')
-		if (!(this.config_.header.ProjectName))
-			throw new Error('No (or misplaced) mandatory header.ProjectName section')
+		if (!(this.config_.header.projectName))
+			throw new Error('No (or misplaced) mandatory header.projectName section')
 		if (!(this.config_.header.genomes))
 			throw new Error('No (or misplaced) mandatory header.genomes section')
 		let typeOfGenomes = ['background', 'reference']
