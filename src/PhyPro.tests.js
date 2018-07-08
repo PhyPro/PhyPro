@@ -18,7 +18,7 @@ const testPath = path.resolve(__dirname, 'test-data')
 const availablePipelines = require('../src/availablePipelines.js')
 const pipelines = Object.keys(availablePipelines)
 
-describe.skip('PhyPro', function() {
+describe('PhyPro', function() {
 	describe('init function', function() {
 		beforeEach(function() {
 			const projectNames = ['template', 'projectName']
