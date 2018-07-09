@@ -41,6 +41,8 @@ class Pipeline {
 		const pipePath = pipelinePath || `${projectPath}/${this.name}`
 		mkdirp.sync(path.resolve(pipePath))
 		this.getConfig()[this.name].path = pipePath
+		this.addHistory('init')
+		this.bumpStage()
 	}
 
 	/**
@@ -124,7 +126,6 @@ class Pipeline {
 		const stagePosition = this.getStagePosition(stage)
 		if (stagePosition === this.config_[this.name].stages.length - 1) {
 			this.log.warn('There is no next stage')
-			throw Error('There is no next stage')
 			return false
 		}
 		return true
@@ -137,30 +138,10 @@ class Pipeline {
 	 */
 	getNextStage() {
 		const currentStage = this.getCurrentStage()
-		this.checkForNextStage(currentStage)
-		const stagePosition = this.getStagePosition(currentStage)
-		return this.config_[this.name].stages[stagePosition + 1]
-	}
-
-	/**
-	 * Bumps the config object to next stage.
-	 * 
-	 * Returns true if successful
-	 * 
-	 * @returns {Boolean}
-	 */
-	bumpStage() {
-		const currentStage = this.getCurrentStage()
-		this.log.debug(`Current stage is ${currentStage}`)
-		this.log.debug(`Should we stop here? ${this.shouldStop()}`)
-		if (!this.shouldStop() && this.checkForNextStage(currentStage)) {
-			const nextStage = this.getNextStage()
-			this.log.debug(`The next stage is ${nextStage}`)
-			this.setCurrentStage(nextStage)
-			this.addHistory(currentStage)
-			return true
+		if (this.checkForNextStage(currentStage)) {
+			const stagePosition = this.getStagePosition(currentStage)
+			return this.config_[this.name].stages[stagePosition + 1]
 		}
-		this.log.warn(`The config file says to stop at ${this.config_[this.name].stop} which is the next stage. Stopping.`)
 		return false
 	}
 
@@ -206,21 +187,45 @@ class Pipeline {
 		this.setHistory_(history)
 	}
 
-	goToNextStage(options) {
-		const stageExecuted = this.getNextStage()
-		this.log.info(`Stage ${stageExecuted} executed successfully.`)
-		if (this.bumpStage()) {
+	/**
+	 * Bumps the config object to next stage.
+	 * 
+	 * Returns true if successful
+	 * 
+	 * @returns {Boolean}
+	 */
+	bumpStage() {
+		const currentStage = this.getCurrentStage()
+		this.log.debug(`Stage ${currentStage} executed sucessfuly.`)
+		this.log.debug(`Should we stop here? ${this.shouldStop()}`)
+		if (!this.shouldStop() && this.checkForNextStage(currentStage)) {
 			const nextStage = this.getNextStage()
-			return this[nextStage](options)
+			this.log.debug(`The next stage is ${nextStage}`)
+			this.setCurrentStage(nextStage)
+			return true
 		}
-		return
+		this.log.warn(`The config file says to stop at ${this.config_[this.name].stop} which is the next stage. Stopping.`)
+		return false
 	}
 
 	keepGoing(options) {
 		const currentStage = this.getCurrentStage()
-		this.log.info(`Current stage: ${currentStage}`)
-		const nextStage = this.getNextStage()
-		this.log.info(`Preparing to execute next stage: ${nextStage}`)
-		return this[nextStage](options)
+		this.log.info(`Preparing to execute stage: ${currentStage}`)
+		return this[currentStage](options)
+	}
+
+	goToNextStage(options) {
+		this.addHistory(this.getCurrentStage())
+		if (this.bumpStage()) {
+			const currentStage = this.getCurrentStage()
+			this.log.info(`Preparing to execute stage: ${currentStage}`)
+			return this[currentStage](options)
+		}
+		return false
+	}
+
+	endPipeline() {
+		this.addHistory(this.getCurrentStage())
+		return true
 	}
 }

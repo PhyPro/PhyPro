@@ -8,6 +8,13 @@ const ConfigUtils = require('./ConfigUtils')
 
 const makeFastaFiles = require('./pipelines/phyloProfile/MakeFastaFiles')
 
+const kDefaults = {
+	numBlastThreads: 4,
+	outputFormat: '"6 qseqid sseqid bitscore pident evalue qlen length"',
+	maxEvalue: 1,
+	maxTargetSeqs: 1000
+}
+
 module.exports =
 class PhyloProfile extends Pipeline {
 	constructor(config = {}) {
@@ -17,6 +24,7 @@ class PhyloProfile extends Pipeline {
 		this.config_ = config
 		this.config_[this.name] = this.config_[this.name] || {
 			stages: [
+				'init',
 				'makeFastaFiles',
 				'trimSequences',
 				'blastAll',
@@ -25,7 +33,13 @@ class PhyloProfile extends Pipeline {
 			history: {},
 			currentStage: 'init',
 			stop: null,
-			pfqlDefinitions: []
+			pfqlDefinitions: [],
+			blastpParams: [
+				['num_threads', kDefaults.numBlastThreads],
+				['outfmt', kDefaults.outputFormat],
+				['evalue', kDefaults.maxEvalue],
+				['max_target_seqs', kDefaults.maxTargetSeqs]
+			]
 		}
 	}
 
@@ -58,17 +72,21 @@ class PhyloProfile extends Pipeline {
 	}
 
 	trimSequences(options) {
-		this.log.info('Starting trimSequences pipeline')
+		this.log.info('Skipping trimSequences stage')
 		return super.goToNextStage(options)
 	}
 
 	blastAll(options) {
-		this.log.info('Starting blastAll pipeline')
+		const info = {
+			pfqlDefinitions: this.config_[this.name].pfqlDefinitions,
+			blatpParams: this.config_[this.name].blastpParams
+		}
+		this.log.info('Starting blastAll stage')
 		return super.goToNextStage(options)
 	}
 
 	parseBlastData(options) {
-		this.log.info('Starting parseBlastData pipeline')
-		return true
+		this.log.info('Starting parseBlastData stage')
+		return super.endPipeline(options)
 	}
 }

@@ -76,11 +76,9 @@ describe('Pipeline', function() {
 			const expectedStage = 'stage1'
 			expect(nextStage).eql(expectedStage)
 		})
-		it('should throw an error if there is no next stage', function() {
+		it('should return false if there is no next stage', function() {
 			const pipeline = new Pipeline()
-			expect(() => {
-				pipeline.getNextStage()
-			}).throw('There is no next stage')
+			expect(pipeline.getNextStage()).to.be.false
 		})
 	})
 	describe('bumpStage', function() {
@@ -132,23 +130,6 @@ describe('Pipeline', function() {
 			expect(pipeline.getCurrentStage()).eql('stage1')
 			expect(pipeline.bumpStage()).to.be.false
 			expect(pipeline.getCurrentStage()).eql('stage1')
-		})
-		it('should write in history', function() {
-			const pipeline = new Pipeline()
-			const newConfig = {
-				pipeline: {
-					stages: ['init', 'stage1'],
-					history: {},
-					currentStage: 'init',
-					stop: null
-				}
-			}
-			pipeline.setConfig(newConfig)
-			pipeline.bumpStage()
-			const history = pipeline.getHistory()
-			const historyKeys = Object.keys(history)
-			const expectedHistoryKey = 'init'
-			expect(historyKeys).to.include(expectedHistoryKey)
 		})
 	})
 })

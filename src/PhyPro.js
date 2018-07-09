@@ -35,7 +35,8 @@ class PhyPro {
 		this.config_.header.history = {}
 		this.config_.empty = true
 		this.log = bunyan.createLogger({name: 'PhyPro - ' + projectName})
-		this.config_.header.projectPath = `./${projectName}`
+		this.config_.header.rootPath = './'
+		this.config_.header.projectPath = this.config_.header.rootPath + projectName
 		this.config_.header.genomicInfoPath = `${this.config_.header.projectPath}/genomicInfo`
 	}
 
@@ -47,18 +48,30 @@ class PhyPro {
 		this.config_ = newConfig
 	}
 
+	saveConfig() {
+		let configFilename = 'phypro.' + this.getConfig().header.projectName + '.config.json'
+		let configFullPath = path.resolve(this.getConfig().header.rootPath, configFilename)
+		console.log(configFullPath)
+		fs.writeFileSync(configFullPath, JSON.stringify(this.getConfig(), null, ' '))
+	}
+
+	updatePaths_(newRootPath) {
+		this.getConfig().header.rootPath = newRootPath
+		this.getConfig().header.projectPath = `${this.getConfig().header.rootPath}/${this.getConfig().header.projectName}`
+		this.getConfig().header.genomicInfoPath = `${this.getConfig().header.projectPath}/genomicInfo`
+	}
+
 	/**
 	 * Initialize the directory structure and configuration file.
 	 * @param {string} [localPath='./']
 	 */
 	init(localPath = './') {
-		const projectPath = `${localPath}/${this.getConfig().header.projectName}`.replace('//', '/')
-		this.getConfig().header.projectPath = projectPath
-		const projectPathResolved = path.resolve(projectPath)
+		if (localPath !== this.getConfig().header.rootPath)
+			this.updatePaths_(localPath)
+		const projectPathResolved = path.resolve(this.getConfig().header.projectPath)
 		mkdirp.sync(projectPathResolved)
 		this.getConfig().header.history.initDate = Date()
 		this.log.info('Project ' + this.getConfig().header.projectName + ' initialized.')
-		this.getConfig().header.genomicInfoPath = `${projectPath}/genomicInfo`
 		mkdirp.sync(path.resolve(this.getConfig().header.genomicInfoPath))
 		pipelines.forEach((pipeline) => {
 			const pipeInstance = new availablePipelines[pipeline](this.getConfig())
@@ -67,11 +80,8 @@ class PhyPro {
 			this.setConfig(updatedConfig)
 			this.log.info('Pipeline ' + pipeline + ' initialized successfully')
 		})
-		let configFilename = 'phypro.' + this.getConfig().header.projectName + '.config.json'
-		let configFullPath = path.resolve(localPath, configFilename)
-
-		fs.writeFileSync(configFullPath, JSON.stringify(this.getConfig(), null, ' '))
-		console.log('Everything looks good, now you must config the config file and run this command again with the flag --keepgoing followed by the pipeline(s) you want to start running. You can run multiple pipelines as once, PhyPro will grab N-1 processors from your computer and divide equally between the tasks. For efficiency in big jobs, try running one pipeline at the time.')
+		this.saveConfig()
+		this.log.info('Everything looks good, now you must config the config file and run this command again with the flag --keepgoing followed by the pipeline(s) you want to start running. You can run multiple pipelines as once, PhyPro will grab N-1 processors from your computer and divide equally between the tasks. For efficiency in big jobs, try running one pipeline at the time.')
 	}
 
 	loadConfigFile(configFilename) {
@@ -106,7 +116,7 @@ class PhyPro {
 			this.log.info('There are ' + N + ' genomes in your config file')
 		})
 			.catch((err) => {
-				console.log(err)
+				this.log.error(err)
 				throw new Error(err)
 			})
 	}
@@ -120,18 +130,31 @@ class PhyPro {
 			this.loadConfigFile()
 		this.isValidProjectStructure_()
 		const promises = []
+		const pipelineInstances = {}
 		pipelineChoices.forEach((pipeline) => {
 			// const PipeInstance = availablePipelines[pipeline]
 			const pipeInstance = new availablePipelines[pipeline](this.config_)
+			pipelineInstances[pipeline] = pipeInstance
 			promises.push(pipeInstance.keepGoing())
 		})
 		Promise.all(promises)
 			.then(() => {
 				this.log.info('Pipeline done')
+				pipelineChoices.forEach((pipeline) => {
+					this.setConfig(pipelineInstances[pipeline].getConfig())
+				})
+				this.saveConfig()
 			})
 			.catch((err) => {
+				this.log.error('There was an error.')
+				this.log.warn('Let\'s first update the config file')
+				pipelineChoices.forEach((pipeline) => {
+					this.setConfig(pipelineInstances[pipeline].getConfig())
+				})
+				this.saveConfig()
 				throw err
 			})
+
 	}
 
 	logInfo(msg) {
@@ -212,8 +235,6 @@ class PhyPro {
 			throw new Error('The current directory does not have the genomicInfo folder. Please check if this is the correct directory.')
 		pipelines.forEach((pipeline) => {
 			const pipelinePath = this.config_[pipeline].path
-			console.log(pipelinePath)
-			console.log(fs.existsSync(pipelinePath))
 			if (!(fs.existsSync(pipelinePath)))
 				throw new Error('The current directory does not have the ' + pipeline + ' folder. Please check if this is the correct directory.')
 		})
